@@ -1,0 +1,90 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+#include "ICnBC"
+internalField   uniform ($Vx $Vy 0);
+
+boundaryField
+{
+    inlet
+    {
+        type            supersonicFreestream;
+        pInf            $Pressure;
+        TInf            $Temperature;
+        UInf            ($Vx $Vy 0);
+        gamma           1.4;
+        value           uniform ($Vx $Vy 0);
+    }
+
+    outlet
+    {
+        type            supersonicFreestream;
+        pInf            $Pressure;
+        TInf            $Temperature;
+        UInf            ($Vx $Vy 0);
+        gamma           1.4;
+        value           uniform ($Vx $Vy 0);
+    }
+
+    top
+    {
+        type            supersonicFreestream;
+        pInf            $Pressure;
+        TInf            $Temperature;
+        UInf            ($Vx $Vy 0);
+        gamma           1.4;
+        value           uniform ($Vx $Vy 0);
+    }
+
+    bottom
+    {
+        type            slip;
+    }
+
+    left
+    {
+        type            supersonicFreestream;
+        pInf            $Pressure;
+        TInf            $Temperature;
+        UInf            ($Vx $Vy 0);
+        gamma           1.4;
+        value           uniform ($Vx $Vy 0);
+    }
+
+    right
+    {
+        type            supersonicFreestream;
+        pInf            $Pressure;
+        TInf            $Temperature;
+        UInf            ($Vx $Vy 0);
+        gamma           1.4;
+        value           uniform ($Vx $Vy 0);
+    }
+
+    bump
+    {
+        type            noSlip;
+    }
+
+    plate
+    {
+        type            noSlip;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,15 @@
+# Python related
+**/__pycache__/
+
+# Unit test
+**/test.Python
+
+# OpenFOAM related
+**/bump.geo
+**/bump.msh
+**/[0-9]/
+!**0/
+**/polyMesh/
+
+# Data relaed
+data/
