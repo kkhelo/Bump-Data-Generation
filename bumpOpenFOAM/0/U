@@ -17,28 +17,24 @@ FoamFile
 dimensions      [0 1 -1 0 0 0 0];
 
 #include "ICnBC"
-internalField   uniform ($Vx $Vy 0);
+V               ($Vx $Vy $Vz);
+internalField   uniform $V ;
 
 boundaryField
 {
     inlet
     {
-        type            supersonicFreestream;
-        pInf            $Pressure;
-        TInf            $Temperature;
-        UInf            ($Vx $Vy 0);
-        gamma           1.4;
-        value           uniform ($Vx $Vy 0);
+        type            fixedValue;
+        value           $internalField;
+
     }
 
     outlet
     {
-        type            supersonicFreestream;
-        pInf            $Pressure;
-        TInf            $Temperature;
-        UInf            ($Vx $Vy 0);
-        gamma           1.4;
-        value           uniform ($Vx $Vy 0);
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (0 0 0);
+
     }
 
     top
@@ -46,9 +42,9 @@ boundaryField
         type            supersonicFreestream;
         pInf            $Pressure;
         TInf            $Temperature;
-        UInf            ($Vx $Vy 0);
+        UInf            $V;
         gamma           1.4;
-        value           uniform ($Vx $Vy 0);
+        value           $internalField;
     }
 
     bottom
@@ -61,9 +57,9 @@ boundaryField
         type            supersonicFreestream;
         pInf            $Pressure;
         TInf            $Temperature;
-        UInf            ($Vx $Vy 0);
+        UInf            $V;
         gamma           1.4;
-        value           uniform ($Vx $Vy 0);
+        value           $internalField;
     }
 
     right
@@ -71,9 +67,9 @@ boundaryField
         type            supersonicFreestream;
         pInf            $Pressure;
         TInf            $Temperature;
-        UInf            ($Vx $Vy 0);
+        UInf            $V;
         gamma           1.4;
-        value           uniform ($Vx $Vy 0);
+        value           $internalField;
     }
 
     bump

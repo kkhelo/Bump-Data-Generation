@@ -38,7 +38,7 @@ boundaryField
     {
         type            inletOutlet;
         inletValue      uniform $Temperature;
-        value           uniform $Temperature;   
+        value           uniform $Temperature;     
     }
 
     top
