@@ -11,44 +11,14 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoPimpleFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0.005;
-
-deltaT          5e-07;
-
-writeControl    timeStep;
-
-writeInterval   5;
-
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-// functions
-// {
-// 	#includeFunc internalCloud
-// }
-
-
-// ************************************************************************* //
+limitT
+{
+    type       limitTemperature;
+    min        100;
+    max        2000;
+    selectionMode all;
+}

@@ -17,61 +17,62 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 1000;
+internalField   uniform 55.5;
 
 boundaryField
 {
     inlet
     {
-        type            fixedValue;
-        value           uniform 1000;
+        type            turbulentIntensityKineticEnergyInlet;
+        intensity       0.01;
+        value           $internalField;
     }
 
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     bottom
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     top
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     left
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      $internalField;
+        value           $internalField;
     }
     
     right
     {
         type            inletOutlet;
-        inletValue      uniform 1000;
-        value           uniform 1000;
+        inletValue      $internalField;
+        value           $internalField;
     }
 
     bump
     {
         type            kqRWallFunction;
-        value           uniform 1000;
+        value           $internalField;
     }
 
     plate
     {
         type            kqRWallFunction;
-        value           uniform 1000;
+        value           $internalField;
     }
 }
 

@@ -1,7 +1,7 @@
 // Initial and boundary conditions for flow field
 Vx           600;
 Vy           0;
-Vz           100;
+Vz           0;
 Temperature  300;
 Pressure     100000;
 

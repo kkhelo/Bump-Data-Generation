@@ -6,6 +6,9 @@ def bumpBuild(k : float, c : float, meshControl : list = [0.01, 0.5, 1], xGrid :
     bumpMeshSize, plateMeshSize, globalMeshSize = meshControl 
 
     with open('bump.geo', 'w') as of:
+        of.write(f'bumpMeshSize = {bumpMeshSize:f};\n')
+        of.write(f'plateMeshSize = {plateMeshSize:f};\n')
+        of.write(f'globalMeshSize = {globalMeshSize:f};\n\n')
 
         # Bump point define
         for x in np.linspace(0, 1.0, xGrid)*np.pi:
@@ -13,16 +16,16 @@ def bumpBuild(k : float, c : float, meshControl : list = [0.01, 0.5, 1], xGrid :
             for y in np.linspace(-1.0, 1.0, yGrid)*np.pi:
                 temp = temp_x/(1/np.cos(np.arctan(y/k)))**2
                 z = np.sqrt(temp) * np.sin(x) * np.sin((y+np.pi)/2)
-                of.write(f'Point({index:d}) = {{{x/np.pi:.3f}, {y/np.pi:.3f}, {z:.6f}, {bumpMeshSize:f}}};\n')
+                of.write(f'Point({index:d}) = {{{x/np.pi:.3f}, {y/np.pi:.3f}, {z:.6f}, bumpMeshSize}};\n')
                 index += 1
         of.write('\n')
 
         # Plate point andl line define
         of.write('// plate points\n')
-        of.write(f'Point(10001) = {{-5.00, -3.00, 0.00, {plateMeshSize:f}}};\n')
-        of.write(f'Point(10002) = {{-5.00, 3.00, 0.00, {plateMeshSize:f}}};\n')
-        of.write(f'Point(10003) = {{1.00, -3.00, 0.00, {plateMeshSize:f}}};\n')
-        of.write(f'Point(10004) = {{1.00, 3.00, 0.00, {plateMeshSize:f}}};\n\n')
+        of.write(f'Point(10001) = {{-5.00, -3.00, 0.00, plateMeshSize}};\n')
+        of.write(f'Point(10002) = {{-5.00, 3.00, 0.00, plateMeshSize}};\n')
+        of.write(f'Point(10003) = {{1.00, -3.00, 0.00, plateMeshSize}};\n')
+        of.write(f'Point(10004) = {{1.00, 3.00, 0.00, plateMeshSize}};\n\n')
         
         of.write( 'Line(10001) = {0, 10001};\n')
         of.write( 'Line(10002) = {10001, 10002};\n')
@@ -34,10 +37,10 @@ def bumpBuild(k : float, c : float, meshControl : list = [0.01, 0.5, 1], xGrid :
 
         # Bottom point andl line define
         of.write('// bottom symetric\n')
-        of.write(f'Point(20001) = {{-15, -10, 0, {globalMeshSize:f}}};\n')
-        of.write(f'Point(20002) = {{-15, 10, 0, {globalMeshSize:f}}};\n')
-        of.write(f'Point(20003) = {{10, -10, 0, {globalMeshSize:f}}};\n')
-        of.write(f'Point(20004) = {{10, 10, 0, {globalMeshSize:f}}};\n\n')
+        of.write(f'Point(20001) = {{-15, -10, 0, globalMeshSize}};\n')
+        of.write(f'Point(20002) = {{-15, 10, 0, globalMeshSize}};\n')
+        of.write(f'Point(20003) = {{10, -10, 0, globalMeshSize}};\n')
+        of.write(f'Point(20004) = {{10, 10, 0, globalMeshSize}};\n\n')
 
         of.write( 'Line(20001) = {10001, 20001};\n')
         of.write( 'Line(20002) = {20001, 20002};\n')
@@ -50,10 +53,10 @@ def bumpBuild(k : float, c : float, meshControl : list = [0.01, 0.5, 1], xGrid :
 
         # Top point andl line define
         of.write('// top surface\n')
-        of.write(f'Point(30001) = {{-15, -10, 10, {globalMeshSize:f}}};\n')
-        of.write(f'Point(30002) = {{-15, 10, 10, {globalMeshSize:f}}};\n')
-        of.write(f'Point(30003) = {{10, -10, 10, {globalMeshSize:f}}};\n')
-        of.write(f'Point(30004) = {{10, 10, 10, {globalMeshSize:f}}};\n\n')
+        of.write(f'Point(30001) = {{-15, -10, 10, globalMeshSize}};\n')
+        of.write(f'Point(30002) = {{-15, 10, 10, globalMeshSize}};\n')
+        of.write(f'Point(30003) = {{10, -10, 10, globalMeshSize}};\n')
+        of.write(f'Point(30004) = {{10, 10, 10, globalMeshSize}};\n\n')
         
         of.write( 'Line(30001) = {30002, 30001};\n')
         of.write( 'Line(30002) = {30001, 30003};\n')
@@ -149,8 +152,11 @@ def bumpBuild(k : float, c : float, meshControl : list = [0.01, 0.5, 1], xGrid :
         of.write( 'Physical Surface("right") = {30003};\n')
         of.write( 'Physical Surface("outlet") = {30004};\n')
         of.write( 'Physical Surface("left") = {30005};\n')
-        of.write( 'Physical Volume("internal") = {1};\n')
+        of.write( 'Physical Volume("internal") = {1};\n\n')
+
+        # of.write( 'General.NumThreads = 20;\n')
+	    
 
 
 if __name__ == '__main__':
-    bumpBuild(k=1.3, c=0.0, meshControl=[0.005, 0.2, 1], xGrid=21, yGrid=41)
+    bumpBuild(k=1.3, c=0.1, meshControl=[0.01, 0.05, 1.0], xGrid=21, yGrid=41)
