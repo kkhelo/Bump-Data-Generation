@@ -68,7 +68,7 @@ class BPG():
         # build bump surface 
         bumpSurface = []
         for i in range(self.xGrid-1):
-            temp = gmsh.model.geo.addCurveLoop([spanWiseSpline[i], streamWiseLineRight[i], -spanWiseSpline[i+1], -streamWiseLineLeft[i]])
+            temp = gmsh.model.geo.addCurveLoop([spanWiseSpline[i], streamWiseLineRight[i], spanWiseSpline[i+1], streamWiseLineLeft[i]], reorient=True)
             bumpSurface.append(gmsh.model.geo.addSurfaceFilling([temp]))
 
         # build plate points
@@ -77,15 +77,13 @@ class BPG():
             for y in [-3, 3]:
                 platePts.append(gmsh.model.geo.addPoint(x, y, 0.00, meshSize=plateMeshSize))
 
-        # swap order and add first node for convinience
+        # swap order for convinience
         platePts[2], platePts[3] = platePts[3], platePts[2]
-        platePts.append(platePts[0])
 
         # build plate line 
         plateLine = []
         for i in range(4):
-            plateLine.append(gmsh.model.geo.addLine(platePts[i], platePts[i+1])) 
-        platePts.pop()
+            plateLine.append(gmsh.model.geo.addLine(platePts[i], platePts[(i+1)%4])) 
 
         plateLine.append(gmsh.model.geo.addLine(platePts[0], bumpPts[0][0]))
         plateLine.append(gmsh.model.geo.addLine(platePts[1], bumpPts[0][-1]))
@@ -94,15 +92,45 @@ class BPG():
 
         # build plate surface
         plateSurface = []
-        
-        plateSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([plateLine[0], plateLine[5], -spanWiseSpline[0], -plateLine[4]])]))
-        temp = [plateLine[1], plateLine[6]]
-        for line in streamWiseLineRight[-1::-1]:
-            temp.append(-line)
-        temp.append(-plateLine[5])
-        plateSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop(temp)]))
-        plateSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([plateLine[2], plateLine[7], spanWiseSpline[-1], -plateLine[6]])]))
-        plateSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([plateLine[3], plateLine[4], *streamWiseLineLeft, -plateLine[7]])]))
+        for i, bumpLine in zip(range(4), [spanWiseSpline[0], streamWiseLineRight, spanWiseSpline[-1], streamWiseLineLeft]):
+            if type(bumpLine) is list : 
+                temp = [plateLine[i], plateLine[(i+1)%4+4], *bumpLine, plateLine[i+4]]
+            else:
+                temp = [plateLine[i], plateLine[(i+1)%4+4], bumpLine, plateLine[i+4]]
+            plateSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop(temp, reorient=True)]))
+
+        # build domain points
+        domainPtsBottom = []
+        domainPtsUpper = []
+        for x in [-15, 10]:
+            for y in [-10, 10]:
+                domainPtsBottom.append(gmsh.model.geo.addPoint(x, y, 0, meshSize=domainMeshSize))
+                domainPtsUpper.append(gmsh.model.geo.addPoint(x, y, 10, meshSize=domainMeshSize))
+
+        # swap order for convinience
+        domainPtsBottom[2], domainPtsBottom[3] = domainPtsBottom[3], domainPtsBottom[2]
+        domainPtsUpper[2], domainPtsUpper[3] = domainPtsUpper[3], domainPtsUpper[2]
+
+        # build domain line 
+        domainLineBottom = []
+        domainLineTop = []
+        for i in range(4):
+            domainLineBottom.append(gmsh.model.geo.addLine(domainPtsBottom[i], domainPtsBottom[(i+1)%4]))
+            domainLineTop.append(gmsh.model.geo.addLine(domainPtsUpper[i], domainPtsUpper[(i+1)%4]))
+
+        for i in range(4):
+            domainLineBottom.append(gmsh.model.geo.addLine(domainPtsBottom[i], platePts[i]))
+            domainLineTop.append(gmsh.model.geo.addLine(domainPtsUpper[i], domainPtsBottom[i]))
+
+        # build domain syrface
+        domainSurface = [[]]
+
+        for i in range(4):
+            temp = gmsh.model.geo.addCurveLoop([domainLineBottom[i], domainLineBottom[(i+1)%4+4], plateLine[i], domainLineBottom[i+4]], reorient=True)
+            domainSurface[0].append(gmsh.model.geo.addPlaneSurface([temp]))
+            
+        for i in range(4):
+            temp = gmsh.model.geo.addCurveLoop([domainLineBottom[i], domainLineTop[(i+1)%4+4], domainLineTop[i], domainLineTop[i+4]], reorient=True)
 
         gmsh.model.geo.synchronize()
 
@@ -112,6 +140,6 @@ if __name__ =='__main__':
     a = BPG(numThreads=20)
     a.buildCoorArray(xGrid=41, yGrid=81)
     a.buildGeometry()
-    if '-nopopup' not in sys.argv:
+    if '-nogui' not in sys.argv:
         gmsh.fltk.run()
     gmsh.finalize()
