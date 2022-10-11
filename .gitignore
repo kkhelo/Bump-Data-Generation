@@ -3,6 +3,7 @@
 
 # Test script
 **/test.py
+**/fullFlow.py
 
 # OpenFOAM related
 **/[0-9]*/
@@ -16,6 +17,7 @@
 
 # Gmsh bump generator old (write to .geo script without boundary layer)
 bumpNoBL.py
+bumpGNP.py
 
 # Data relaed
 data/

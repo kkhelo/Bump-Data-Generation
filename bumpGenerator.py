@@ -6,15 +6,20 @@
 """
 
 import numpy as np 
-import gmsh, sys
+import gmsh, sys, os, time
 
 class BPG():
-    def __init__(self, name : str = 'bump', numThreads : int = 1) -> None:
-        gmsh.initialize()
+    def __init__(self, name : str = 'bump', numThreads : int = 1, saveDir : str = './') -> None:
+        gmsh.initialize(sys.argv)
         gmsh.model.add(name)
+        # mesh file path 
+        self.savePath = os.path.join(saveDir, name + '.msh')
+
         gmsh.option.setNumber('General.NumThreads', numThreads)
+        gmsh.option.setNumber('General.Terminal', 1)
+        # Set 3D alrorithm to HXT will produce error.
         gmsh.option.setNumber('Mesh.Algorithm3D', 1)
-        # gmsh.option.setNumber('General.ExpertMode', 1)
+        gmsh.option.setNumber('Mesh.Algorithm', 8)
         gmsh.option.setNumber('Mesh.MshFileVersion', 2)
         
     def buildCoorArray(self, k : float = 1.3, c : float = 0.1, xGrid : int = 21, yGrid : int = 41) -> list:
@@ -128,7 +133,8 @@ class BPG():
             domainSurface.append(gmsh.model.geo.addPlaneSurface([temp]))
         
         # top
-        domainSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([domainLineTop[i] for i in range(3,-1,-1)], reorient=True)]))
+        # domainSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([-domainLineTop[i] for i in range(3,-1,-1)], reorient=True)]))
+        domainSurface.append(gmsh.model.geo.addPlaneSurface([gmsh.model.geo.addCurveLoop([-domainLineTop[i] for i in range(3,-1,-1)])]))
 
         self.domainSurface = domainSurface
         self.plateSurface = plateSurface
@@ -146,24 +152,22 @@ class BPG():
         # build tag list for extrudeBoundaryLayer function
         tags = []
         for tag in self.plateSurface+self.bumpSurface:
-        # for tag in self.bumpSurface:
             tags.append((2, -tag))
 
         # extrude boundary layer
         extbl = gmsh.model.geo.extrudeBoundaryLayer(tags, numElements=[1]*numLayers, heights=heights, recombine=True)
 
         # build bl top surface list, volume list and side surface list
-        blSurfaceTop, blSideSurface, blVolume = [], [], []
+        blSurfaceTop, blSurfaceSide, blVolume = [], [], []
         for i in range(1, len(extbl)):
             if extbl[i][0] == 3:
                 blSurfaceTop.append(-extbl[i-1][1])
-                blVolume.append(extbl[i][1])    
-
-        for i in [3, 3+7+1, self.xGrid+17, 2*self.xGrid+23]:
-            blSideSurface.append(-extbl[i][1])
+                blVolume.append(extbl[i][1])   
+                if len(blSurfaceSide) < 4 :
+                    blSurfaceSide.append(-extbl[i+2][1]) 
 
         # build volume
-        temp = [*self.domainSurface[0][:2], *blSideSurface[:2], *blSurfaceTop, *blSideSurface[2:], *self.domainSurface[0][2:], *self.domainSurface[1:]]
+        temp = [*self.domainSurface[0][:2], *blSurfaceSide[:2], *blSurfaceTop, *blSurfaceSide[2:], *self.domainSurface[0][2:], *self.domainSurface[1:]]
         temp = gmsh.model.geo.addSurfaceLoop(temp)
         volume = blVolume + [gmsh.model.geo.addVolume([temp])]
 
@@ -179,22 +183,23 @@ class BPG():
         gmsh.model.addPhysicalGroup(2, self.bumpSurface, name='bump')
         gmsh.model.addPhysicalGroup(3, volume, name='internal')
 
-        gmsh.model.geo.synchronize()
-
     def mesh(self, numRefine : int = 1):
         gmsh.model.mesh.generate(3)
         for i in range(numRefine):
             gmsh.model.mesh.refine()
-        gmsh.write('bump.msh')
-
+        # gmsh.model.mesh.optimize()
+        gmsh.write(self.savePath)
+        if '-nopopup' not in sys.argv:
+            gmsh.fltk.run()
+        gmsh.finalize()
 
 
 if __name__ =='__main__':
+    startTime = time.time()
     a = BPG(numThreads=30)
-    a.buildCoorArray(xGrid=51, yGrid=101)
-    a.buildGeometry(bumpMeshSize=0.054, plateMeshSize=0.08, domainMeshSize=1)
-    a.buildBlAndVolume(numLayers=10, firstHeight=0.0004)
-    a.mesh(1)
-    if '-nogui' not in sys.argv:
-        gmsh.fltk.run()
-    gmsh.finalize()
+    a.buildCoorArray(xGrid=41, yGrid=81)
+    a.buildGeometry(bumpMeshSize=0.032, plateMeshSize=0.06, domainMeshSize=1.1)
+    a.buildBlAndVolume(numLayers=10, firstHeight=0.0003, ratio=1.2)
+    a.mesh()
+    duration = (time.time() - startTime)/60
+    print(f'Duration : {duration:.2f} mins')
