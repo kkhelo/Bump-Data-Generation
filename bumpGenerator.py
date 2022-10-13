@@ -17,9 +17,6 @@ class BPG():
 
         gmsh.option.setNumber('General.NumThreads', numThreads)
         gmsh.option.setNumber('General.Terminal', 1)
-        # Set 3D alrorithm to HXT will produce error.
-        gmsh.option.setNumber('Mesh.Algorithm3D', 1)
-        gmsh.option.setNumber('Mesh.Algorithm', 8)
         gmsh.option.setNumber('Mesh.MshFileVersion', 2)
         
     def buildCoorArray(self, k : float = 1.3, c : float = 0.1, xGrid : int = 21, yGrid : int = 41) -> list:
@@ -184,11 +181,21 @@ class BPG():
         gmsh.model.addPhysicalGroup(3, volume, name='internal')
 
     def mesh(self, numRefine : int = 1):
+
+        # gmsh.option.setNumber("Mesh.ElementOrder", 2)
+        gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 20)
+        gmsh.option.setNumber("Mesh.SmoothRatio", 3)
+        gmsh.option.setNumber("Mesh.AngleToleranceFacetOverlap", 0.05)
+        gmsh.option.setNumber("Mesh.AnisoMax", 1000)
+        gmsh.option.setNumber("Mesh.Algorithm", 7)
+        gmsh.option.setNumber('Mesh.Algorithm3D', 1)
+        
         gmsh.model.mesh.generate(3)
-        for i in range(numRefine):
-            gmsh.model.mesh.refine()
+        # for i in range(numRefine):
+        #     gmsh.model.mesh.refine()
         # gmsh.model.mesh.optimize()
         gmsh.write(self.savePath)
+        gmsh.write('bump.vtk')
         if '-nopopup' not in sys.argv:
             gmsh.fltk.run()
         gmsh.finalize()
@@ -198,8 +205,8 @@ if __name__ =='__main__':
     startTime = time.time()
     a = BPG(numThreads=30)
     a.buildCoorArray(xGrid=41, yGrid=81)
-    a.buildGeometry(bumpMeshSize=0.032, plateMeshSize=0.06, domainMeshSize=1.1)
-    a.buildBlAndVolume(numLayers=10, firstHeight=0.0003, ratio=1.2)
+    a.buildGeometry(bumpMeshSize=0.012, plateMeshSize=0.018, domainMeshSize=1)
+    a.buildBlAndVolume(numLayers=10, firstHeight=0.0001, ratio=1.2)
     a.mesh()
     duration = (time.time() - startTime)/60
     print(f'Duration : {duration:.2f} mins')
