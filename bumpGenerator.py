@@ -36,6 +36,7 @@ class BPG():
     def buildGeometry(self, bumpMeshSize : float = 0.01, plateMeshSize : float = 0.05, domainMeshSize : float = 0.5) -> None:
         
         bumpEdgePtsRight, bumpEdgePtsLeft, bumpPts = [], [], [[]]
+        self.bumpMeshSize, self.plateMeshSize, self.domainMeshSize = bumpMeshSize, plateMeshSize, domainMeshSize
 
         # build bump points from corrdinates array
         for pt in self.pts :
@@ -136,6 +137,7 @@ class BPG():
         self.domainSurface = domainSurface
         self.plateSurface = plateSurface
         self.bumpSurface = bumpSurface
+        self.plateLine = plateLine[:4]
 
         gmsh.model.geo.synchronize()
 
@@ -168,6 +170,25 @@ class BPG():
         temp = gmsh.model.geo.addSurfaceLoop(temp)
         volume = blVolume + [gmsh.model.geo.addVolume([temp])]
 
+        for i in range(4):
+            # distance field from plate boundary curve
+            gmsh.model.mesh.field.add('Distance', i)
+            gmsh.model.mesh.field.setNumber(i, "CurvesList", self.plateLine[i])
+            gmsh.model.mesh.field.setNumber(i, 'Sampling', int(6/self.plateMeshSize))
+
+            # mesh control from distance field
+            gmsh.model.mesh.field.add('Threshold', i+4)
+            gmsh.model.mesh.field.setNumber(i+4, 'InField', i)
+            gmsh.model.mesh.field.setNumber(i+4, "SizeMin", firstHeight)
+            gmsh.model.mesh.field.setNumber(i+4, "SizeMax", self.plateMeshSize*3)
+            # gmsh.model.mesh.field.setNumber(i+4, "DistMin", self.plateMeshSize*0.9)
+            # gmsh.model.mesh.field.setNumber(i+4, "DistMax", self.plateMeshSize*3)
+            gmsh.model.mesh.field.setNumber(i+4, "DistMin", 0.1)
+            gmsh.model.mesh.field.setNumber(i+4, "DistMax", 1.0)
+            gmsh.model.mesh.field.setNumber(i+4, "StopAtDistMax", 1)
+
+        gmsh.option.setNumber("Mesh.MeshSizeMax", self.domainMeshSize)
+        gmsh.option.setNumber("Mesh.MeshSizeMin", firstHeight)
         gmsh.model.geo.synchronize()
 
         gmsh.model.addPhysicalGroup(2, self.domainSurface[0], name='bottom')
@@ -182,18 +203,11 @@ class BPG():
 
     def mesh(self, numRefine : int = 1):
 
-        # gmsh.option.setNumber("Mesh.ElementOrder", 2)
-        gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 20)
-        gmsh.option.setNumber("Mesh.SmoothRatio", 3)
-        gmsh.option.setNumber("Mesh.AngleToleranceFacetOverlap", 0.05)
-        gmsh.option.setNumber("Mesh.AnisoMax", 1000)
-        gmsh.option.setNumber("Mesh.Algorithm", 7)
+        gmsh.option.setNumber("Mesh.Algorithm", 5)
         gmsh.option.setNumber('Mesh.Algorithm3D', 1)
         
         gmsh.model.mesh.generate(3)
-        # for i in range(numRefine):
-        #     gmsh.model.mesh.refine()
-        # gmsh.model.mesh.optimize()
+
         gmsh.write(self.savePath)
         gmsh.write('bump.vtk')
         if '-nopopup' not in sys.argv:
@@ -205,8 +219,8 @@ if __name__ =='__main__':
     startTime = time.time()
     a = BPG(numThreads=30)
     a.buildCoorArray(xGrid=41, yGrid=81)
-    a.buildGeometry(bumpMeshSize=0.012, plateMeshSize=0.018, domainMeshSize=1)
-    a.buildBlAndVolume(numLayers=10, firstHeight=0.0001, ratio=1.2)
+    a.buildGeometry(bumpMeshSize=0.005, plateMeshSize=0.02, domainMeshSize=1)
+    a.buildBlAndVolume(numLayers=30, firstHeight=0.000003, ratio=1.2)
     a.mesh()
     duration = (time.time() - startTime)/60
     print(f'Duration : {duration:.2f} mins')
