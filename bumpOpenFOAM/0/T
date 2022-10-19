@@ -36,30 +36,22 @@ boundaryField
 
     bottom
     {
-        type            inletOutlet;
-        inletValue      uniform $Temperature;
-        value           uniform $Temperature;     
+        type            zeroGradient;  
     }
 
     top
     {
-        type            inletOutlet;
-        inletValue      uniform $Temperature;
-        value           uniform $Temperature;   
+        type            symmetryPlane; 
     }
 
     left
     {
-        type            inletOutlet;
-        inletValue      uniform $Temperature;
-        value           uniform $Temperature;   
+        type            symmetryPlane;  
     }
 
     right
     {
-        type            inletOutlet;
-        inletValue      uniform $Temperature;
-        value           uniform $Temperature;   
+        type            symmetryPlane;  
     }
 
     bump

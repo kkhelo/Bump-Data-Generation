@@ -44,23 +44,17 @@ boundaryField
 
     top
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            symmetryPlane;
     }
 
     left
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            symmetryPlane;
     }
     
     right  
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            symmetryPlane;
     }
 
     bump

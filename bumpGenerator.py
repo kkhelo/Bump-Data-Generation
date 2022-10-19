@@ -17,6 +17,7 @@ class BPG():
 
         gmsh.option.setNumber('General.NumThreads', numThreads)
         gmsh.option.setNumber('General.Terminal', 1)
+        gmsh.option.setNumber('General.ExpertMode', 1)
         gmsh.option.setNumber('Mesh.MshFileVersion', 2)
         
     def buildCoorArray(self, k : float = 1.3, c : float = 0.1, xGrid : int = 21, yGrid : int = 41) -> list:
@@ -68,9 +69,10 @@ class BPG():
 
         # build plate points
         platePts = []
-        for x in [-5, 3]:
-            for y in [-3, 3]:
+        for x in [-3, 2]:
+            for y in [-2, 2]:
                 platePts.append(gmsh.model.geo.addPoint(x, y, 0.00, meshSize=plateMeshSize))
+                # platePts.append(gmsh.model.geo.addPoint(x, y, 0.00))
 
         # swap order for convinience
         platePts[2], platePts[3] = platePts[3], platePts[2]
@@ -170,25 +172,24 @@ class BPG():
         temp = gmsh.model.geo.addSurfaceLoop(temp)
         volume = blVolume + [gmsh.model.geo.addVolume([temp])]
 
-        for i in range(4):
-            # distance field from plate boundary curve
-            gmsh.model.mesh.field.add('Distance', i)
-            gmsh.model.mesh.field.setNumber(i, "CurvesList", self.plateLine[i])
-            gmsh.model.mesh.field.setNumber(i, 'Sampling', int(6/self.plateMeshSize))
+        gmsh.model.mesh.field.add('Distance', 1)
+        gmsh.model.mesh.field.setNumbers(1, "CurvesList", self.plateLine)
+        gmsh.model.mesh.field.setNumber(1, 'Sampling', int(4/self.plateMeshSize)/2)
 
-            # mesh control from distance field
-            gmsh.model.mesh.field.add('Threshold', i+4)
-            gmsh.model.mesh.field.setNumber(i+4, 'InField', i)
-            gmsh.model.mesh.field.setNumber(i+4, "SizeMin", firstHeight)
-            gmsh.model.mesh.field.setNumber(i+4, "SizeMax", self.plateMeshSize*3)
-            # gmsh.model.mesh.field.setNumber(i+4, "DistMin", self.plateMeshSize*0.9)
-            # gmsh.model.mesh.field.setNumber(i+4, "DistMax", self.plateMeshSize*3)
-            gmsh.model.mesh.field.setNumber(i+4, "DistMin", 0.1)
-            gmsh.model.mesh.field.setNumber(i+4, "DistMax", 1.0)
-            gmsh.model.mesh.field.setNumber(i+4, "StopAtDistMax", 1)
+        # mesh control from distance field
+        gmsh.model.mesh.field.add('Threshold', 2)
+        gmsh.model.mesh.field.setNumber(2, 'InField', 1)
+        gmsh.model.mesh.field.setNumber(2, "SizeMin", self.bumpMeshSize*0.1)
+        gmsh.model.mesh.field.setNumber(2, "SizeMax", self.plateMeshSize)
+        gmsh.model.mesh.field.setNumber(2, "DistMin", self.bumpMeshSize/2)
+        gmsh.model.mesh.field.setNumber(2, "DistMax", 0.1)
+        # gmsh.model.mesh.field.setNumber(2, "Sigmoid", 1)
+        gmsh.model.mesh.field.setNumber(2, "StopAtDistMax", 1)
 
-        gmsh.option.setNumber("Mesh.MeshSizeMax", self.domainMeshSize)
-        gmsh.option.setNumber("Mesh.MeshSizeMin", firstHeight)
+        gmsh.model.mesh.field.setAsBackgroundMesh(2)
+
+        # gmsh.option.setNumber("Mesh.MeshSizeMax", self.domainMeshSize*1.2)
+        # gmsh.option.setNumber("Mesh.MeshSizeMin", self.bumpMeshSize)
         gmsh.model.geo.synchronize()
 
         gmsh.model.addPhysicalGroup(2, self.domainSurface[0], name='bottom')
@@ -207,20 +208,25 @@ class BPG():
         gmsh.option.setNumber('Mesh.Algorithm3D', 1)
         
         gmsh.model.mesh.generate(3)
-
-        gmsh.write(self.savePath)
+        gmsh.write('bump.msh')
         gmsh.write('bump.vtk')
-        if '-nopopup' not in sys.argv:
-            gmsh.fltk.run()
+        gmsh.model.mesh.optimize()
+        gmsh.write('bump_op.msh')
+        gmsh.write('bump_op.vtk')
+
+        # gmsh.write(self.savePath)
+        gmsh.write('bump_op.vtk')
+        # if '-nopopup' not in sys.argv:
+        #     gmsh.fltk.run()
         gmsh.finalize()
 
 
 if __name__ =='__main__':
     startTime = time.time()
     a = BPG(numThreads=30)
-    a.buildCoorArray(xGrid=41, yGrid=81)
-    a.buildGeometry(bumpMeshSize=0.005, plateMeshSize=0.02, domainMeshSize=1)
-    a.buildBlAndVolume(numLayers=30, firstHeight=0.000003, ratio=1.2)
+    a.buildCoorArray(xGrid=51, yGrid=101)
+    a.buildGeometry(bumpMeshSize=0.01, plateMeshSize=0.05, domainMeshSize=1)
+    a.buildBlAndVolume(numLayers=20, firstHeight=0.00005, ratio=1.2)
     a.mesh()
     duration = (time.time() - startTime)/60
     print(f'Duration : {duration:.2f} mins')

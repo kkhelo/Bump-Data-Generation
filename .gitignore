@@ -7,7 +7,7 @@
 
 # OpenFOAM related
 **/[0-9]*/
-!bumpOpenFOAM/0/
+!bumpOpenFOAM*/0/
 **/polyMesh/
 
 # Gmsh related 

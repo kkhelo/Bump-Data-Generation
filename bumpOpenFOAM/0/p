@@ -40,42 +40,24 @@ boundaryField
 
     top
     {
-        type            waveTransmissive;
-        field           p;
-        psi             thermo:psi;
-        gamma           1.4;
-        fieldInf        $Pressure;
-        lInf            1;
-        value           uniform $Pressure;
+        type            symmetryPlane;
     }
 
     
     bottom
     {
-        type            slip;
+        type            zeroGradient;
     }
     
 
     left
     {
-        type            waveTransmissive;
-        field           p;
-        psi             thermo:psi;
-        gamma           1.4;
-        fieldInf        $Pressure;
-        lInf            1;
-        value           uniform $Pressure;
+        type            symmetryPlane;
     }
 
     right
     {
-        type            waveTransmissive;
-        field           p;
-        psi             thermo:psi;
-        gamma           1.4;
-        fieldInf        $Pressure;
-        lInf            1;
-        value           uniform $Pressure;
+        type            symmetryPlane;
     }
 
     bump

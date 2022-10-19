@@ -32,28 +32,25 @@ boundaryField
         value           $internalField;
     }
 
-    top
-    {
-        type            calculated;
-        value           $internalField;
-    }
-
     bottom
     {
         type            calculated;
         value           $internalField;
     }
 
+    top
+    {
+        type            symmetryPlane;
+    }
+
     left
     {
-        type            calculated;
-        value           $internalField;
+        type            symmetryPlane;
     }
 
     right
     {
-        type            calculated;
-        value           $internalField;
+        type            symmetryPlane;
     }
 
     bump

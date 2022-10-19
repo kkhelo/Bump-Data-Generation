@@ -32,19 +32,13 @@ boundaryField
     outlet
     {
         type            inletOutlet;
+        value           $internalField;
         inletValue      uniform (0 0 0);
-        value           uniform (0 0 0);
-
     }
 
     top
     {
-        type            supersonicFreestream;
-        pInf            $Pressure;
-        TInf            $Temperature;
-        UInf            $V;
-        gamma           1.4;
-        value           $internalField;
+        type            symmetryPlane;  
     }
 
     bottom
@@ -54,22 +48,12 @@ boundaryField
 
     left
     {
-        type            supersonicFreestream;
-        pInf            $Pressure;
-        TInf            $Temperature;
-        UInf            $V;
-        gamma           1.4;
-        value           $internalField;
+        type            symmetryPlane;  
     }
 
     right
     {
-        type            supersonicFreestream;
-        pInf            $Pressure;
-        TInf            $Temperature;
-        UInf            $V;
-        gamma           1.4;
-        value           $internalField;
+        type            symmetryPlane;  
     }
 
     bump

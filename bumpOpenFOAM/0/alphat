@@ -35,9 +35,9 @@ boundaryField
 
     top
     {
-        type            calculated;
-        value           uniform 0;
+        type            symmetryPlane;
     }
+    
 
     bottom
     {
@@ -47,14 +47,12 @@ boundaryField
 
     left
     {
-        type            calculated;
-        value           uniform 0;
+        type            symmetryPlane;
     }
 
     right
     {
-        type            calculated;
-        value           uniform 0;
+        type            symmetryPlane;
     }
 
     bump
