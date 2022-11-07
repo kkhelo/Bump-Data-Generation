@@ -1,0 +1,13 @@
+Name    SizeMin    SizeMax    DistMin    DistMax    Sampling    bl
+bump1   bump*0.05  plate*0.5  bump       0.1        (4/plate)*2 30 0.00008 1.12
+bump2   bump*0.1   plate      bump       bump*5   (4/bump)//2+1 ..
+bump3   bump*0.1   plate      bump//2    bump*2.5  (4/bump)+1   ..
+bump4   *** no field ***                                        ..
+bump5   bump*0.2   plate      bump//2    bump*2  (4/bump)*5+1   20 0.0001 1.2
+bump6   bump*0.2   plate      bump//4    bump*2  (4/bump)*4+1   20 0.0001 1.2
+bump7   bump*0.1   plate      bump//4    bump*2  (4/bump)*4+1   20 0.0001 1.2      domainMesh = 1.0 scalefactor = 0.5,        
+bump8   bump*0.1   plate      bump//4    bump*2  (4/bump)*4+1   12 0.001 1.2  bumpMesh = 0.04, plateMesh = 0.1, doaminMesh = 0.8, scalefactor = 0.6,
+bump9   simmilar to 8, but plateMesh = 0.04, doaminMesh = 0.5
+bump10  simillar to 4,                                          12 0.0001 1.45 bumpMesh = 0.02, plateMesh = 0.05, doaminMesh = 0.5, algo to 6
+bump11  simillar to 10,                                         12 0.0002 1.15 bumpMesh = 0.006, plateMesh = 0.018, doaminMesh = 0.3, scalefactor = 0.5,algo to 6
+bump12  similar to 11, 

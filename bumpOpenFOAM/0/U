@@ -1,13 +1,12 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  5                                     |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
-|    \\/     M anipulation  |                                                 |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
     format      ascii;
     class       volVectorField;
     object      U;
@@ -18,22 +17,26 @@ dimensions      [0 1 -1 0 0 0 0];
 
 #include "ICnBC"
 V               ($Vx $Vy $Vz);
-internalField   uniform $V ;
+internalField   uniform $V;
 
 boundaryField
 {
     inlet
     {
         type            fixedValue;
-        value           $internalField;
+        value           uniform $V;
 
     }
 
+    // outlet
+    // {
+    //     type            inletOutlet;
+    //     value           $internalField;
+    //     inletValue      uniform (0 0 0);
+    // }
     outlet
     {
-        type            inletOutlet;
-        value           $internalField;
-        inletValue      uniform (0 0 0);
+        type            zeroGradient;
     }
 
     top

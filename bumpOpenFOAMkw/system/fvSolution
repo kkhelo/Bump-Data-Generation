@@ -26,58 +26,79 @@ solvers
     {
         solver          GAMG;
         smoother        GaussSeidel;
-        tolerance       1e-9;
+        tolerance       1e-5;
         relTol          0.01;
+        nCellsInCoarsestLevel 20;
     }
 
     pFinal
     {
-        $p;
+        $p
         relTol          0;
     }
 
-    "(U|k|epsilon|e)"
+    "(U|h|k|omega)"
     {
-        solver          PBiCGStab;
-        preconditioner  diagonal;
-        tolerance       1e-06;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-5;
         relTol          0.1;
     }
 
-    "(U|k|epsilon|e)Final"
+    "(U|h|k|omega)Final"
     {
         $U;
         relTol          0;
     }
 }
 
-SIMPLE
-{
-    residualControl
-    {
-        p               1e-4;
-        U               1e-4;
-        "(k|epsilon|e)"   1e-4;
-    }
-
-    nNonOrthogonalCorrectors 0;
-    pMinFactor      0.1;
-    pMaxFactor      2;
-}
-
 PIMPLE
 {
-    nOuterCorrectors    2;
-    nCorrectors         2;
+    transonic           true;
+    // momentumPredictor   true;
     nNonOrthogonalCorrectors 1;
-    transonic           yes;
-}
+    nCorrectors          1;
+    nOuterCorrectors    50;
+ 
+    outerCorrectorResidualControl 
+    {
+        U
+        {
+            tolerance   1e-4;
+            relTol      0;
+        }  
 
+        p
+        {
+            tolerance   1e-4;
+            relTol      0;
+        }
+
+        h
+        {
+            tolerance   1e-5;
+            relTol      0;
+        }
+
+        // "(k|omega|h)"
+        // {
+        //     tolerance   1e-5;
+        //     relTol      0;
+        // }
+     }
+}
+ 
 relaxationFactors
 {
+    fields
+    {
+        p       0.3;
+        pFinal  1;
+    }
     equations
     {
-        ".*"            1;
+        "(U|k|omega|h)"     0.3;
+        "(U|k|omega|h)Final"   1;
     }
 }
 

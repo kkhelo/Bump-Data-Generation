@@ -34,18 +34,19 @@ class BPG():
         self.pts = pts
         self.xGrid, self.yGrid = xGrid, yGrid
 
-    def buildGeometry(self, bumpMeshSize : float = 0.01, plateMeshSize : float = 0.05, domainMeshSize : float = 0.5) -> None:
+    def buildGeometry(self, bumpMeshSize : float = 0.01, plateMeshSize : float = 0.05, domainMeshSize : float = 0.5, scaleFactor : float = 1.0) -> None:
         
         bumpEdgePtsRight, bumpEdgePtsLeft, bumpPts = [], [], [[]]
         self.bumpMeshSize, self.plateMeshSize, self.domainMeshSize = bumpMeshSize, plateMeshSize, domainMeshSize
 
         # build bump points from corrdinates array
         for pt in self.pts :
-            if pt[1] == 1.0 :
+            pt = list(np.array(pt)*scaleFactor)
+            if pt[1] == 1.0*scaleFactor :
                 bumpEdgePtsRight.append(gmsh.model.geo.addPoint(*pt, meshSize=bumpMeshSize))
                 bumpPts[-1].append(bumpEdgePtsRight[-1])
                 bumpPts.append([])
-            elif pt[1] == -1.0 :
+            elif pt[1] == -1.0*scaleFactor :
                 bumpEdgePtsLeft.append(gmsh.model.geo.addPoint(*pt, meshSize=bumpMeshSize))
                 bumpPts[-1].append(bumpEdgePtsLeft[-1])
             else:
@@ -69,13 +70,15 @@ class BPG():
 
         # build plate points
         platePts = []
-        for x in [-3, 2]:
-            for y in [-2, 2]:
+        self.yPlateSpan = [-2*scaleFactor, 2*scaleFactor]
+        self.xPlateSpan = [-3*scaleFactor, 2*scaleFactor]
+        for x in self.xPlateSpan:
+            for y in self.yPlateSpan:
                 platePts.append(gmsh.model.geo.addPoint(x, y, 0.00, meshSize=plateMeshSize))
-                # platePts.append(gmsh.model.geo.addPoint(x, y, 0.00))
 
         # swap order for convinience
         platePts[2], platePts[3] = platePts[3], platePts[2]
+        self.platePts = platePts
 
         # build plate line 
         plateLine = []
@@ -99,10 +102,13 @@ class BPG():
         # build domain points
         domainPtsBottom = []
         domainPtsUpper = []
-        for x in [-15, 10]:
-            for y in [-10, 10]:
+        xDomainSpan = [-15*scaleFactor, 10*scaleFactor]
+        yDomainSpan = [-10*scaleFactor, 10*scaleFactor]
+        zTop = 10*scaleFactor
+        for x in xDomainSpan:
+            for y in yDomainSpan:
                 domainPtsBottom.append(gmsh.model.geo.addPoint(x, y, 0, meshSize=domainMeshSize))
-                domainPtsUpper.append(gmsh.model.geo.addPoint(x, y, 10, meshSize=domainMeshSize))
+                domainPtsUpper.append(gmsh.model.geo.addPoint(x, y, zTop, meshSize=domainMeshSize))
 
         # swap order for convinience
         domainPtsBottom[2], domainPtsBottom[3] = domainPtsBottom[3], domainPtsBottom[2]
@@ -156,7 +162,8 @@ class BPG():
             tags.append((2, -tag))
 
         # extrude boundary layer
-        extbl = gmsh.model.geo.extrudeBoundaryLayer(tags, numElements=[1]*numLayers, heights=heights, recombine=True)
+        # extbl = gmsh.model.geo.extrudeBoundaryLayer(tags, numElements=[1]*numLayers, heights=heights, recombine=True)
+        extbl = gmsh.model.geo.extrudeBoundaryLayer(tags, numElements=[1]*numLayers, heights=heights)
 
         # build bl top surface list, volume list and side surface list
         blSurfaceTop, blSurfaceSide, blVolume = [], [], []
@@ -171,26 +178,38 @@ class BPG():
         temp = [*self.domainSurface[0][:2], *blSurfaceSide[:2], *blSurfaceTop, *blSurfaceSide[2:], *self.domainSurface[0][2:], *self.domainSurface[1:]]
         temp = gmsh.model.geo.addSurfaceLoop(temp)
         volume = blVolume + [gmsh.model.geo.addVolume([temp])]
+        gmsh.model.geo.synchronize()
 
+        # mesh field distance from front and back plate line
+        ySpan = self.yPlateSpan[-1] - self.yPlateSpan[0]
         gmsh.model.mesh.field.add('Distance', 1)
-        gmsh.model.mesh.field.setNumbers(1, "CurvesList", self.plateLine)
-        gmsh.model.mesh.field.setNumber(1, 'Sampling', int(4/self.plateMeshSize)/2)
+        gmsh.model.mesh.field.setNumbers(1, "CurvesList", [self.plateLine[0], self.plateLine[2]])
+        gmsh.model.mesh.field.setNumber(1, 'Sampling', int(ySpan/self.bumpMeshSize)*4+1)
+
+        # mesh field distance from right and left plate line
+        xSpan = self.xPlateSpan[-1] - self.xPlateSpan[0]
+        gmsh.model.mesh.field.add('Distance', 2)
+        gmsh.model.mesh.field.setNumbers(2, "CurvesList", [self.plateLine[1], self.plateLine[3]])
+        gmsh.model.mesh.field.setNumber(2, 'Sampling', int(xSpan/self.bumpMeshSize)*4+1)
+
+        # mesh field distance from 4 plate points
+        gmsh.model.mesh.field.add('Distance', 3)
+        gmsh.model.mesh.field.setNumbers(3, "PointsList", self.platePts)
 
         # mesh control from distance field
-        gmsh.model.mesh.field.add('Threshold', 2)
-        gmsh.model.mesh.field.setNumber(2, 'InField', 1)
-        gmsh.model.mesh.field.setNumber(2, "SizeMin", self.bumpMeshSize*0.1)
-        gmsh.model.mesh.field.setNumber(2, "SizeMax", self.plateMeshSize)
-        gmsh.model.mesh.field.setNumber(2, "DistMin", self.bumpMeshSize/2)
-        gmsh.model.mesh.field.setNumber(2, "DistMax", 0.1)
-        # gmsh.model.mesh.field.setNumber(2, "Sigmoid", 1)
-        gmsh.model.mesh.field.setNumber(2, "StopAtDistMax", 1)
+        for i in range(4, 7):
+            gmsh.model.mesh.field.add('Threshold', i)
+            gmsh.model.mesh.field.setNumber(i, 'InField', i-3)
+            gmsh.model.mesh.field.setNumber(i, "SizeMin", self.bumpMeshSize*0.1)
+            gmsh.model.mesh.field.setNumber(i, "SizeMax", self.plateMeshSize)
+            gmsh.model.mesh.field.setNumber(i, "DistMin", self.bumpMeshSize//4)
+            gmsh.model.mesh.field.setNumber(i, "DistMax", self.bumpMeshSize*2)
+            gmsh.model.mesh.field.setNumber(i, "StopAtDistMax", 1)
 
-        gmsh.model.mesh.field.setAsBackgroundMesh(2)
-
-        # gmsh.option.setNumber("Mesh.MeshSizeMax", self.domainMeshSize*1.2)
-        # gmsh.option.setNumber("Mesh.MeshSizeMin", self.bumpMeshSize)
-        gmsh.model.geo.synchronize()
+        # set background mesh
+        gmsh.model.mesh.field.add("Min", 7)
+        gmsh.model.mesh.field.setNumbers(7, "FieldsList", [4, 5, 6])
+        # gmsh.model.mesh.field.setAsBackgroundMesh(7)
 
         gmsh.model.addPhysicalGroup(2, self.domainSurface[0], name='bottom')
         gmsh.model.addPhysicalGroup(2, [self.domainSurface[1]], name='inlet')
@@ -202,31 +221,31 @@ class BPG():
         gmsh.model.addPhysicalGroup(2, self.bumpSurface, name='bump')
         gmsh.model.addPhysicalGroup(3, volume, name='internal')
 
+        # free memory
+        del self.domainSurface, self.domainMeshSize
+        del self.plateSurface, self.plateLine, self.platePts, self.plateMeshSize, self.xPlateSpan, self.yPlateSpan
+        del self.bumpSurface, self.bumpMeshSize
+
     def mesh(self, numRefine : int = 1):
 
-        gmsh.option.setNumber("Mesh.Algorithm", 5)
-        gmsh.option.setNumber('Mesh.Algorithm3D', 1)
+        gmsh.option.setNumber("Mesh.Algorithm", 6)
+        gmsh.option.setNumber('Mesh.Algorithm3D', 10)
         
         gmsh.model.mesh.generate(3)
-        gmsh.write('bump.msh')
-        gmsh.write('bump.vtk')
-        gmsh.model.mesh.optimize()
-        gmsh.write('bump_op.msh')
-        gmsh.write('bump_op.vtk')
 
-        # gmsh.write(self.savePath)
-        gmsh.write('bump_op.vtk')
-        # if '-nopopup' not in sys.argv:
-        #     gmsh.fltk.run()
+        gmsh.write(self.savePath)
+        gmsh.write('bump.vtk')
+        
         gmsh.finalize()
 
-
+  
 if __name__ =='__main__':
     startTime = time.time()
-    a = BPG(numThreads=30)
-    a.buildCoorArray(xGrid=51, yGrid=101)
-    a.buildGeometry(bumpMeshSize=0.01, plateMeshSize=0.05, domainMeshSize=1)
-    a.buildBlAndVolume(numLayers=20, firstHeight=0.00005, ratio=1.2)
+    a = BPG(numThreads=16)
+    a.buildCoorArray(xGrid=41, yGrid=81)
+    a.buildGeometry(bumpMeshSize=0.006, plateMeshSize=0.018, domainMeshSize=0.3, scaleFactor=0.5)
+    a.buildBlAndVolume(numLayers=12, firstHeight=0.0002, ratio=1.15)
     a.mesh()
+    # gmsh.fltk.run()
     duration = (time.time() - startTime)/60
     print(f'Duration : {duration:.2f} mins')

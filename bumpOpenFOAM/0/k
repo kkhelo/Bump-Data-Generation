@@ -1,13 +1,12 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  5                                     |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
-|    \\/     M anipulation  |                                                 |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
     format      ascii;
     class       volScalarField;
     location    "0";
@@ -17,7 +16,10 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 27.75;
+// k = 1.5 * (U * I) ^ 2
+// I = 0.5%
+// from https://www.simscale.com/docs/simulation-setup/global-settings/k-epsilon/
+internalField   uniform 13.5;
 
 boundaryField
 {
@@ -27,26 +29,34 @@ boundaryField
         intensity       0.005;
         value           $internalField;
     }
+    // inlet
+    // {
+    //     type            fixedValue;
+    //     value           $internalField;
+    // }
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            zeroGradient;
     }
 
     bottom
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            zeroGradient;
     }
+
+    // bottom, outlet
+    // {
+    //     type            inletOutlet;
+    //     inletValue      $internalField;
+    //     value           $internalField;
+    // }
 
     top
     {
         type            symmetryPlane;
     }
-
+ 
     left
     {
         type            symmetryPlane;

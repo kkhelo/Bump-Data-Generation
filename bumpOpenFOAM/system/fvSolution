@@ -1,13 +1,12 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-| =========                 |                                                 |
-| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  5                                     |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
-|    \\/     M anipulation  |                                                 |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  10
+     \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
     format      ascii;
     class       dictionary;
     location    "system";
@@ -17,60 +16,66 @@ FoamFile
 
 solvers
 {   
-    "rho(|Final)"
+    rho
     {
-        solver          diagnal;
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-5;
+        relTol          0.1;
     }
-    
+
+    rhoFinal
+    {
+        $rho;
+        relTol          0;
+    }
+
     p
     {
         solver          GAMG;
         smoother        GaussSeidel;
-        tolerance       1e-9;
+        tolerance       1e-6;
         relTol          0.01;
+        nCellsInCoarsestLevel 20;
     }
 
     pFinal
     {
-        $p;
+        $p
         relTol          0;
     }
 
-    "(U|k|epsilon|e)"
+    "(U|h|k|epsilon)"
     {
-        solver          PBiCGStab;
-        preconditioner  diagonal;
-        tolerance       1e-06;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-5;
         relTol          0.1;
     }
 
-    "(U|k|epsilon|e)Final"
+    "(U|h|k|epsilon)Final"
     {
         $U;
         relTol          0;
     }
 }
 
-SIMPLE
-{
-    residualControl
-    {
-        p               1e-4;
-        U               1e-4;
-        "(k|epsilon|e)"   1e-4;
-    }
-
-    nNonOrthogonalCorrectors 0;
-    pMinFactor      0.1;
-    pMaxFactor      2;
-}
-
 PIMPLE
 {
-    nOuterCorrectors    2;
+    momentumPredictor   yes;
+    transonic           yes;
+    nOuterCorrectors    1;
     nCorrectors         2;
     nNonOrthogonalCorrectors 1;
-    transonic           yes;
+
+    outerCorrectorResidualControl
+    {
+        "(U|k|epsilon)"
+        {
+            relTol          0;
+            tolerance       0.0001;
+        }
+    }
 }
 
 relaxationFactors
