@@ -1,19 +1,21 @@
 # Python related
 **/__pycache__/
 
-# Test script
+# Test
 **/test.py
 **/fullFlow.py
 
 # OpenFOAM related
 **/[0-9]*/
-!bumpOpenFOAM*/0/
+!bumpOpenFOAM/0/
 **/polyMesh/
 **/cellToRegion
+bumpOpenFOAM*/
 
 # Gmsh related 
 **/*.geo
 **/*.msh
+meshVTK/
 **/*.vtk
 
 # Gmsh bump generator old (write to .geo script without boundary layer)
@@ -25,3 +27,4 @@ data/
 
 # Log related
 **/*.log
+checkMeshLog/

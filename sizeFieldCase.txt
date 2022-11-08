@@ -9,5 +9,6 @@ bump7   bump*0.1   plate      bump//4    bump*2  (4/bump)*4+1   20 0.0001 1.2   
 bump8   bump*0.1   plate      bump//4    bump*2  (4/bump)*4+1   12 0.001 1.2  bumpMesh = 0.04, plateMesh = 0.1, doaminMesh = 0.8, scalefactor = 0.6,
 bump9   simmilar to 8, but plateMesh = 0.04, doaminMesh = 0.5
 bump10  simillar to 4,                                          12 0.0001 1.45 bumpMesh = 0.02, plateMesh = 0.05, doaminMesh = 0.5, algo to 6
-bump11  simillar to 10,                                         12 0.0002 1.15 bumpMesh = 0.006, plateMesh = 0.018, doaminMesh = 0.3, scalefactor = 0.5,algo to 6
-bump12  similar to 11, 
+bump11  simillar to 10,                                         12 0.00002 1.15 bumpMesh = 0.006, plateMesh = 0.018, doaminMesh = 0.3, scalefactor = 0.5,algo to 6
+bump12  similar to 11,                                          10 0.00002 1.2  bm = 0.0013, pm = 0.0065, dm = 0.25, sf = 0.5       *** too large to scan
+bump13  similar to 10, with bump8 field

@@ -52,8 +52,13 @@ def bumpTriGen(bumpMeshSize : float = 0.01, k : float = 1.3, c : float = 0.1, xG
             temp = gmsh.model.geo.addCurveLoop([spanWiseSpline[i], streamWiseLineRight[i], spanWiseSpline[i+1], streamWiseLineLeft[i]], reorient=True)
             bumpSurface.append(gmsh.model.geo.addSurfaceFilling([temp]))
 
+        temp = gmsh.model.geo.addCurveLoop([spanWiseSpline[0], *streamWiseLineRight, spanWiseSpline[-1], *streamWiseLineLeft], reorient=True)
+        bumpBottomSurface = gmsh.model.geo.addPlaneSurface([temp])
+        bumpSurface.append(bumpBottomSurface)
+
         gmsh.model.geo.synchronize()
         gmsh.model.addPhysicalGroup(2, bumpSurface, name='bump')
+        # gmsh.model.addPhysicalGroup(2, [bumpBottomSurface], name='bottom')
 
         gmsh.option.setNumber("Mesh.Algorithm", 6)
         

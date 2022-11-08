@@ -209,7 +209,7 @@ class BPG():
         # set background mesh
         gmsh.model.mesh.field.add("Min", 7)
         gmsh.model.mesh.field.setNumbers(7, "FieldsList", [4, 5, 6])
-        # gmsh.model.mesh.field.setAsBackgroundMesh(7)
+        gmsh.model.mesh.field.setAsBackgroundMesh(7)
 
         gmsh.model.addPhysicalGroup(2, self.domainSurface[0], name='bottom')
         gmsh.model.addPhysicalGroup(2, [self.domainSurface[1]], name='inlet')
@@ -243,8 +243,8 @@ if __name__ =='__main__':
     startTime = time.time()
     a = BPG(numThreads=16)
     a.buildCoorArray(xGrid=41, yGrid=81)
-    a.buildGeometry(bumpMeshSize=0.006, plateMeshSize=0.018, domainMeshSize=0.3, scaleFactor=0.5)
-    a.buildBlAndVolume(numLayers=12, firstHeight=0.0002, ratio=1.15)
+    a.buildGeometry(bumpMeshSize=0.02, plateMeshSize=0.05, domainMeshSize=0.5, scaleFactor=0.5)
+    a.buildBlAndVolume(numLayers=12, firstHeight=0.0001, ratio=1.45)
     a.mesh()
     # gmsh.fltk.run()
     duration = (time.time() - startTime)/60
