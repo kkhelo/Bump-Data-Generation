@@ -231,9 +231,9 @@ class BPG():
         gmsh.option.setNumber("Mesh.Algorithm", 6)
         gmsh.option.setNumber('Mesh.Algorithm3D', 10)
         
-        gmsh.model.mesh.generate(3)
+        gmsh.model.mesh.generate(2)
 
-        gmsh.write(self.savePath)
+        # gmsh.write(self.savePath)
         gmsh.write('bump.vtk')
         
         gmsh.finalize()

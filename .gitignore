@@ -21,6 +21,7 @@ meshVTK/
 # Gmsh bump generator old (write to .geo script without boundary layer)
 bumpNoBL.py
 bumpGNP.py
+fakeBumpGen.py
 
 # Data relaed
 data/
