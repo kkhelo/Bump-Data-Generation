@@ -6,17 +6,19 @@
 **/fullFlow.py
 
 # OpenFOAM related
-**/[0-9]*/
-!bumpOpenFOAM/0/
+**/[1-9]*/
 **/polyMesh/
 **/cellToRegion
 bumpOpenFOAM*/
+VTK/
+hisa*
 
 # Gmsh related 
 **/*.geo
 **/*.msh
 meshVTK/
 **/*.vtk
+stlBump/
 
 # Gmsh bump generator old (write to .geo script without boundary layer)
 bumpNoBL.py
@@ -25,7 +27,8 @@ fakeBumpGen.py
 
 # Data relaed
 data/
+preprocessing/
 
 # Log related
-**/*.log
-checkMeshLog/
+**/log.*
+
