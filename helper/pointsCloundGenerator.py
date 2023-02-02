@@ -49,10 +49,12 @@ class bumpProbesWriter():
     """
     Create probes point cloud file for given bump geometry parameters. 
     
+    DEBUG flag sets to False will supress file clean up information
     """
-    def __init__(self, k : float, c : float, d : int, xBound = [0, 1], yBound = [-1, 1], scaleFactor : float = 0.5, res : int = 256, rootDir : str = '') -> None:
+    def __init__(self, k : float, c : float, d : int, xBound = [0, 1], yBound = [-1, 1], scaleFactor : float = 0.5, res : int = 256, rootDir : str = '', DEBUG : bool = True) -> None:
         self.__bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
         self.__res = res
+        self.__DEBUG = DEBUG
         self.__rootDir = os.path.join(rootDir, self.__bumpName, 'system', 'include')
         if not os.path.exists(self.__rootDir):
             os.makedirs(self.__rootDir, exist_ok=True)
@@ -88,7 +90,8 @@ class bumpProbesWriter():
             of.write(');\n')
     
     def AIP(self, neighbor : int = 1, neighborSpacing : float = 0.05):
-        # fileDir = os.path.join(fileRootDir, self.__bumpName + '_AIP')
+        
+        self.cleanAIPSlices()
         bumpApex = np.max(self.__zSurfacePoints)
         AIPLocation = self.__xList[np.where(self.__zSurfacePoints == bumpApex)[0][0]]
         
@@ -121,14 +124,29 @@ class bumpProbesWriter():
         """
         fileList = os.listdir(self.__rootDir)
         if 'x1' not in fileList :
-            print(f'None of flowDirectional slice file found in {self.__rootDir}')
+            if self.__DEBUG : print(f'None of flowDirectional slice file found in {self.__rootDir}')
             return
         
         for file in fileList:
             if 'x' in file:
                 os.remove(os.path.join(self.__rootDir, file))
 
-        print(f'Clean up flowDirecitonal slice files in {self.__rootDir}')    
+        if self.__DEBUG :  print(f'Clean up flowDirecitonal slice files in {self.__rootDir}')    
+
+    def cleanAIPSlices(self):
+        """
+        Clean up AIP slices in given root path
+        """
+        fileList = os.listdir(self.__rootDir)
+        if 'AIP' not in fileList :
+            if self.__DEBUG :  print(f'None of AIP slice file found in {self.__rootDir}')
+            return
+        
+        for file in fileList:
+            if 'AIP' in file:
+                os.remove(os.path.join(self.__rootDir, file))
+
+        if self.__DEBUG :  print(f'Clean up AIP slice files in {self.__rootDir}')   
 
     
 
@@ -142,9 +160,11 @@ if __name__ == '__main__' :
                 bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
 
                 G = bumpProbesWriter(k, c, d, rootDir='preprocessing')
+                # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
                 # G.writeSurface()
                 G.AIP(neighbor=2, neighborSpacing=0.02)
                 # G.flowDirectionalSlice(nSlices=5)
                 # G.cleanFlowDirectionalSlices()
+                # G.cleanAIPSlices()
     
     pass

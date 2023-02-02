@@ -12,6 +12,7 @@
 bumpOpenFOAM*/
 VTK/
 hisa*
+fluentToFoam.py
 
 # Gmsh related 
 **/*.geo

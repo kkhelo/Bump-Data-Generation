@@ -86,15 +86,21 @@ class DFMG():
        
     def constructAIPFieldArray(self, fieldName : list = ['p', 'p0', 'rho', 'Ux', 'Uy', 'Uz']):
         """
-        Read AIP_p_po_U.xy and its meighbor in srcPath, and construct numpy array from it. 
-        
-        * Raise ValueError if number of data points is not equal to square of res
+        Read AIP_p_po_U.xy and its neighbors in srcPath, and construct numpy array from it. 
+        File will be save in $srcPath/AIPData.npz will following keys
+
+        * AIPData : 4-D array with size (numberOfNeighbors, numberOfFields, resolution, resolution)
+        * geoMask : 3-D array with size (numberOfNeighbors, resolution, resolution)
+        * AIPTags : 1-D array specified AIP tags, ex : ['AIP1', 'AIP', 'AIPM1']
+
         """
 
         self.__AIPPath = glob.glob(self.__AIPPath)
         self.__AIPPath = sorted(self.__AIPPath)
         neighbors = len(self.__AIPPath)
         AIPData = np.zeros((neighbors, len(fieldName), self.resolution, self.resolution))
+        geoMask = np.zeros((neighbors, self.resolution, self.resolution))
+        AIPTags = []
         
         for indexNeighbor, path in zip(range(neighbors), self.__AIPPath) :
             temp = np.zeros((len(fieldName), self.resolution, self.resolution))
@@ -103,7 +109,7 @@ class DFMG():
             zList = np.linspace(foamData[0,2], foamData[-1,2], self.resolution)           
 
             ptrFoamData = 0
-            geoMask = np.zeros((256,256))
+            
             for i in range(self.resolution):
                 for j in range(self.resolution):
                     if abs(foamData[ptrFoamData, 2]-zList[j]) <= 0.0001 :
@@ -111,9 +117,10 @@ class DFMG():
                         ptrFoamData += 1
                     else:
                         temp[:,i,j] = 0
-                        geoMask[i,j] = 1
+                        geoMask[indexNeighbor,i,j] = 1
 
-            if self.__mode == 'DEMO' and path.split('/')[-1].split('_')[0] == 'AIP':
+            AIPTags.append(path.split('/')[-1].split('_')[0])
+            if self.__mode == 'DEMO' and  AIPTags[-1] == 'AIP':
                 # AIP flow field images
                 for i in range(len(fieldName)):
                     plt.figure(figsize=(8,4))
@@ -129,14 +136,13 @@ class DFMG():
                 plt.figure(figsize=(8,4))
                 plt.tight_layout()
                 plt.axis('off')
-                plt.contourf(geoMask.transpose(), levels = 200, cmap='Greys')
+                plt.contourf(geoMask[indexNeighbor].transpose(), levels = 200, cmap='Greys')
                 plt.colorbar()
                 plt.savefig(os.path.join(self.__targetPath, f'geoMask'))
                 plt.close()
 
                 # Total pressure recovery images
                 TPR = temp[1]/np.max(temp[1])
-                print(TPR.shape, np.max(TPR))
                 plt.figure(figsize=(8,4))
                 plt.tight_layout()
                 plt.axis('off')
@@ -147,7 +153,7 @@ class DFMG():
 
             AIPData[indexNeighbor] = temp
 
-        np.savez_compressed(os.path.join(self.__targetPath, 'AIPData'), AIPData = AIPData)
+        np.savez_compressed(os.path.join(self.__targetPath, 'AIPData'), AIPData = AIPData, geoMask=geoMask, AIPTags=AIPTags)
 
         
 if __name__ == '__main__':
