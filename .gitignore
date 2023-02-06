@@ -4,6 +4,7 @@
 # Test
 **/test.py
 **/fullFlow.py
+testDatasetBuild.py
 
 # OpenFOAM related
 **/[1-9]*/
@@ -13,6 +14,9 @@ bumpOpenFOAM*/
 VTK/
 hisa*
 fluentToFoam.py
+d14/
+d21/
+d28/
 
 # Gmsh related 
 **/*.geo
