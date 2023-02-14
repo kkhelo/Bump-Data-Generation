@@ -1,4 +1,4 @@
-# Python related
+# Python
 **/__pycache__/
 
 # Test
@@ -6,7 +6,7 @@
 **/fullFlow.py
 testDatasetBuild.py
 
-# OpenFOAM related
+# OpenFOAM
 **/[1-9]*/
 **/polyMesh/
 **/cellToRegion
@@ -14,11 +14,14 @@ bumpOpenFOAM*/
 VTK/
 hisa*
 fluentToFoam.py
+
+# Data generation
 d14/
 d21/
 d28/
+ID*/
 
-# Gmsh related 
+# Gmsh
 **/*.geo
 **/*.msh
 meshVTK/
@@ -30,10 +33,10 @@ bumpNoBL.py
 bumpGNP.py
 fakeBumpGen.py
 
-# Data relaed
+# Data
 data/
 preprocessing/
 
-# Log related
+# Log
 **/log.*
 

@@ -193,7 +193,7 @@ class PPDB():
     def linkTimeHistory(self, case):
         # Check if case exists
         if not os.path.exists(os.path.join(self.__rawDataRoot, case)) : 
-            raise FileExistsError(f'Case {self.geoName} @ {case} Mach is not exist in rawDataBase!')
+            raise FileExistsError(f'Case {self.geoName} @ {case} Mach is not exist in {self.__rawDataRoot}!')
         
         self.timeHistory = self.__checkTimeHistory(case)
 

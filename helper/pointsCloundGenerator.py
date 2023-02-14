@@ -51,7 +51,7 @@ class bumpProbesWriter():
     
     DEBUG flag sets to False will supress file clean up information
     """
-    def __init__(self, k : float, c : float, d : int, xBound = [0, 1], yBound = [-1, 1], scaleFactor : float = 0.5, res : int = 256, rootDir : str = '', DEBUG : bool = True) -> None:
+    def __init__(self, k : float, c : float, d : int, xBound = [0, 1], yBound = [-1, 1], zBound = [0, 1], scaleFactor : float = 0.5, res : int = 256, rootDir : str = '', DEBUG : bool = True) -> None:
         self.__bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
         self.__res = res
         self.__DEBUG = DEBUG
@@ -77,6 +77,7 @@ class bumpProbesWriter():
         self.__xList = __xList * scaleFactor
         self.__yList = __yList * scaleFactor
         self.__scaleFactor = scaleFactor
+        self.__zBound = zBound
 
     def writeSurface(self):
         # fileDir = os.path.join(fileRootDir, self.__bumpName + '_surface')
@@ -95,17 +96,12 @@ class bumpProbesWriter():
         bumpApex = np.max(self.__zSurfacePoints)
         AIPLocation = self.__xList[np.where(self.__zSurfacePoints == bumpApex)[0][0]]
         
-        xSlice(xCoor=AIPLocation, zBound=[0, bumpApex*2], fileDir=self.__rootDir, pointName='AIP')
+        xSlice(xCoor=AIPLocation, zBound=self.__zBound, fileDir=self.__rootDir, pointName='AIP')
         for i in range(1, neighbor+1) :
             if (AIPLocation + i * neighborSpacing > self.__xList[-1]) or (AIPLocation - i * neighborSpacing < self.__xList[0]) : 
                 return
-            xSlice(xCoor=AIPLocation + i * neighborSpacing, zBound=[0, bumpApex*2], fileDir=self.__rootDir, pointName=f'AIP{i}')
-            xSlice(xCoor=AIPLocation - i * neighborSpacing, zBound=[0, bumpApex*2], fileDir=self.__rootDir, pointName=f'AIPm{i}')
-
-        self.__bumpApex = bumpApex
-        # plt.figure()
-        # plt.contourf(self.__zSurfacePoints)
-        # plt.savefig('test.png')
+            xSlice(xCoor=AIPLocation + i * neighborSpacing, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'AIP{i}')
+            xSlice(xCoor=AIPLocation - i * neighborSpacing, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'AIPm{i}')
 
     def flowDirectionalSlice(self, nSlices : int = 5):
         """
@@ -116,7 +112,7 @@ class bumpProbesWriter():
         xList = np.linspace(0, self.__scaleFactor*1, nSlices)
         os.system(f'rm -rf {self.__rootDir}/x*')
         for i, x in zip(range(1, nSlices+1), xList):
-            xSlice(x, zBound=[0, self.__bumpApex*2], fileDir=self.__rootDir, pointName=f'x{i}')
+            xSlice(x, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'x{i}')
 
     def cleanFlowDirectionalSlices(self):
         """
@@ -163,7 +159,7 @@ if __name__ == '__main__' :
                 # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
                 # G.writeSurface()
                 G.AIP(neighbor=2, neighborSpacing=0.02)
-                # G.flowDirectionalSlice(nSlices=5)
+                G.flowDirectionalSlice(nSlices=5)
                 # G.cleanFlowDirectionalSlices()
                 # G.cleanAIPSlices()
     
