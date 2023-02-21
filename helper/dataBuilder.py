@@ -195,10 +195,11 @@ class PPDB():
         if not os.path.exists(os.path.join(self.__rawDataRoot, case)) : 
             raise FileExistsError(f'Case {self.geoName} @ {case} Mach is not exist in {self.__rawDataRoot}!')
         
-        self.timeHistory = self.__checkTimeHistory(case)
+        self.timeHistory = temp = self.__checkTimeHistory(case)
 
         if os.path.exists(os.path.join(self.__caseRoot, self.timeHistory, self.flowProperties[0])):
             self.cleanUpTimeHistory()
+            self.timeHistory = temp
     
         rawDataRoot = os.path.join(self.__rawDataRoot, case, self.timeHistory)
         caseTempTimePath = os.path.join(self.__caseRoot, self.timeHistory)
@@ -233,32 +234,44 @@ class PPDB():
         src = os.path.join('preprocessing', self.geoName, 'system/include')
         os.system(f'cp -r {src} {dst}')
 
-    def post(self, override : bool = False, mode='demo'):
+    def post(self, override : bool = False, mode='demo', res=256):
         postProcessDataPath = os.path.join(self.__postProcessDataRoot, self.case, self.timeHistory)
         
         # Check if post process data exists in database 
         # Override old data if flag is on
         if os.path.exists(postProcessDataPath):
             if override :
-                os.remove(postProcessDataPath)
+                print(f'Case {self.geoName} @ {self.case} Mach overrided')
+                print(postProcessDataPath)
+                os.system(f'rm -rf {postProcessDataPath}')
+                
             else : 
                 raise FileExistsError(f'Case {self.geoName} @ {self.case} Mach is already exist in database!')
 
         os.makedirs(postProcessDataPath)
 
         os.chdir(self.__caseRoot)
-        status = os.system('postProcess -latestTime -func boundaryCloud > log.boundaryCloud')
-        if status != 0 : 
+
+        try :
+            status = os.system('postProcess -latestTime -func boundaryCloud > log.boundaryCloud')
+        except:
+            status = -1
             self.__failedCaseHandler('boundaryCloud', postProcessDataPath)
+        if status : return
+
         os.remove('log.boundaryCloud')
 
-        status = os.system('postProcess -latestTime -func internalCloud > log.internalCloud')
-        if status != 0 : 
+        try :
+            status = os.system('postProcess -latestTime -func internalCloud> log.internalCloud')
+        except:
+            status = -1
             self.__failedCaseHandler('internalCloud', postProcessDataPath)
+        if status : return    
+    
         os.remove('log.internalCloud')
         os.chdir('..')
 
-        generator = DFMG(srcPath=self.__caseRoot, targetPath=postProcessDataPath, mode=mode)
+        generator = DFMG(srcPath=self.__caseRoot, targetPath=postProcessDataPath, mode=mode, res=res)
         generator.constructAIPFieldArray()
         generator.constructSurfacePressureArray()
         

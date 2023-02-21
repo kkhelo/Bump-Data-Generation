@@ -87,7 +87,10 @@ class bumpProbesWriter():
             of.write('(\n')
             for i, x in zip(range(self.__res), self.__xList):
                 for j, y in zip(range(self.__res), self.__yList):
+                    # 0.05 units above surface point
                     of.write(f'({x} {y} {self.__zSurfacePoints[i, j]})\n')
+                    # surface point
+                    # of.write(f'({x} {y} {self.__zSurfacePoints[i, j]+0.005})\n')
             of.write(');\n')
     
     def AIP(self, neighbor : int = 1, neighborSpacing : float = 0.05):
@@ -96,12 +99,12 @@ class bumpProbesWriter():
         bumpApex = np.max(self.__zSurfacePoints)
         AIPLocation = self.__xList[np.where(self.__zSurfacePoints == bumpApex)[0][0]]
         
-        xSlice(xCoor=AIPLocation, zBound=self.__zBound, fileDir=self.__rootDir, pointName='AIP')
+        xSlice(xCoor=AIPLocation, zBound=self.__zBound, res=self.__res, fileDir=self.__rootDir, pointName='AIP')
         for i in range(1, neighbor+1) :
             if (AIPLocation + i * neighborSpacing > self.__xList[-1]) or (AIPLocation - i * neighborSpacing < self.__xList[0]) : 
                 return
-            xSlice(xCoor=AIPLocation + i * neighborSpacing, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'AIP{i}')
-            xSlice(xCoor=AIPLocation - i * neighborSpacing, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'AIPm{i}')
+            xSlice(xCoor=AIPLocation + i * neighborSpacing, zBound=self.__zBound, res=self.__res, fileDir=self.__rootDir, pointName=f'AIP{i}')
+            xSlice(xCoor=AIPLocation - i * neighborSpacing, zBound=self.__zBound, res=self.__res, fileDir=self.__rootDir, pointName=f'AIPm{i}')
 
     def flowDirectionalSlice(self, nSlices : int = 5):
         """
@@ -112,7 +115,7 @@ class bumpProbesWriter():
         xList = np.linspace(0, self.__scaleFactor*1, nSlices)
         os.system(f'rm -rf {self.__rootDir}/x*')
         for i, x in zip(range(1, nSlices+1), xList):
-            xSlice(x, zBound=self.__zBound, fileDir=self.__rootDir, pointName=f'x{i}')
+            xSlice(x, zBound=self.__zBound, res=self.__res, fileDir=self.__rootDir, pointName=f'x{i}')
 
     def cleanFlowDirectionalSlices(self):
         """
@@ -147,20 +150,26 @@ class bumpProbesWriter():
     
 
 if __name__ == '__main__' :
-    # ySlice(yCoor=-0.1)
-    # xSlice(xCoor=0.2)
-    # bs = bumpSurface(k = 0.5, c = 0.1)
     for k in [0.5, 0.75, 1.0]:
         for c in [0.1, 0.3, 0.5]:
             for d in [14, 21, 28]:
                 bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
 
-                G = bumpProbesWriter(k, c, d, rootDir='preprocessing')
+                G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
                 # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
-                # G.writeSurface()
-                G.AIP(neighbor=2, neighborSpacing=0.02)
-                G.flowDirectionalSlice(nSlices=5)
+                G.writeSurface()
+                # G.AIP(neighbor=2, neighborSpacing=0.02)
+                # G.flowDirectionalSlice(nSlices=5)
                 # G.cleanFlowDirectionalSlices()
                 # G.cleanAIPSlices()
     
+    # G = bumpProbesWriter(0.5, 0.3, 21, rootDir='preprocessing', res=256)
+    # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
+    # G.writeSurface()
+    # G.AIP(neighbor=2, neighborSpacing=0.02)
+    # G.flowDirectionalSlice(nSlices=5)
+    # G.cleanFlowDirectionalSlices()
+    # G.cleanAIPSlices()
+
+
     pass

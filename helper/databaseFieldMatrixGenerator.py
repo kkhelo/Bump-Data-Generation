@@ -56,7 +56,7 @@ class DFMG():
 
         # Check number of data points 
         nPts = pressureData.shape[0]
-        if math.sqrt(nPts) - self.resolution :
+        if math.sqrt(nPts) - self.resolution != 0:
             raise ValueError(f'Number of data points is not math with resolution, nPts : {nPts}')
 
         heightsArray, pressureArray = pressureData[:,2], pressureData[:,3]
