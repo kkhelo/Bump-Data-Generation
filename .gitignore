@@ -11,8 +11,8 @@ testDatasetBuild.py
 **/polyMesh/
 **/cellToRegion
 bumpOpenFOAM*/
+hisaMesh
 VTK/
-hisa*
 fluentToFoam.py
 
 # Data generation

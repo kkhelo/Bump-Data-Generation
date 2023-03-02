@@ -1,0 +1,46 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+|                                                                             |
+|    HiSA: High Speed Aerodynamic solver                                      |
+|    Copyright (C) 2014-2017 Johan Heyns - CSIR, South Africa                 |
+|    Copyright (C) 2014-2017 Oliver Oxtoby - CSIR, South Africa               |
+|                                                                             |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           volScalarField;
+    object          p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "include/freestreamConditions"
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform $p;
+
+boundaryField
+{
+    wall
+    {
+        type            characteristicWallPressure;
+        value           $internalField;
+    }
+    freestream
+    {
+        type            characteristicFarfieldPressure;
+        #include        "include/freestreamConditions"
+        U               ($Ux 0 0);
+        value           $internalField;
+    }
+    bottom
+    {
+        type            symmetry;
+        value           $internalField;
+    }
+
+}
+
+
+// ************************************************************************* //

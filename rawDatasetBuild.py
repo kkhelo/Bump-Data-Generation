@@ -5,7 +5,7 @@ usage : build raw dataset with specified cone angle and number.
 flags : 
     * -d : cone angle, must declare.
     * --samples : number of data to build, default is 10.
-    * --targetpath : path to post processed dataset, where the file will save to. Default is dada/demo.
+    * --targetpath : path to post processed dataset, where the file will save to. Default is data/rawData.
 author : Bo-Yuan You
 Date : 2023-01-15
 

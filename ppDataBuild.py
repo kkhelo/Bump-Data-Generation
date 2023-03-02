@@ -6,7 +6,7 @@ flags :
     * -n : number of processors, default is 1.
     * -o : override, default is False.
     * --rawpath : path to raw daraset, default is data/rawData.
-    * --targetpath : path to post processed dataset, where the file will save to. Default is dada/demo.
+    * --targetpath : path to post processed dataset, where the file will save to. Default is data/demo.
     * --demo : activated demo mode. Demo mode creates figure from data but train mode doesn't. Default is train.
     * --geometry : specified geometry, this build only do 1 geometry not every in raw dataset.
 author : Bo-Yuan You
@@ -35,10 +35,8 @@ def task(geoName, override = False, mode = 'train', targetPath='data/demo', rawD
     print(geoName, temp.cases)
 
     for case in temp.cases:
-        # case = '2.56'
         temp.linkTimeHistory(case)
         try :
-            # temp.post(mode='train')
             temp.post(override=override, mode=mode, res=256)
             print(f'Case {geoName} @ {case} Mach end. Elapsed time {time.time() - last} seconds')
         except :
@@ -46,7 +44,6 @@ def task(geoName, override = False, mode = 'train', targetPath='data/demo', rawD
 
         temp.cleanUpTimeHistory()
         last = time.time()
-        break
 
     temp.unLinkMesh()
     print(f'All cases in {geoName} completed. Total time elapsed {time.time() - start} seconds')
