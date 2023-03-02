@@ -87,10 +87,8 @@ class bumpProbesWriter():
             of.write('(\n')
             for i, x in zip(range(self.__res), self.__xList):
                 for j, y in zip(range(self.__res), self.__yList):
-                    # 0.05 units above surface point
                     of.write(f'({x} {y} {self.__zSurfacePoints[i, j]})\n')
-                    # surface point
-                    # of.write(f'({x} {y} {self.__zSurfacePoints[i, j]+0.005})\n')
+
             of.write(');\n')
     
     def AIP(self, neighbor : int = 1, neighborSpacing : float = 0.05):
@@ -158,7 +156,9 @@ if __name__ == '__main__' :
                 G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
                 # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
                 G.writeSurface()
-                # G.AIP(neighbor=2, neighborSpacing=0.02)
+                G.AIP(neighbor=2, neighborSpacing=0.02)
+                # if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
+                #     os.mkdir(f'preprocessing/{bumpName}/mesh')
                 # G.flowDirectionalSlice(nSlices=5)
                 # G.cleanFlowDirectionalSlices()
                 # G.cleanAIPSlices()

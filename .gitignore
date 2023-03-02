@@ -26,7 +26,7 @@ ID*/
 **/*.msh
 meshVTK/
 **/*.vtk
-stlBump/
+stlBump*/
 
 # Gmsh bump generator old (write to .geo script without boundary layer)
 bumpNoBL.py

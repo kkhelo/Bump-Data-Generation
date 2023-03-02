@@ -59,8 +59,7 @@ class RDB():
 
     # Public
     def linkMesh(self):
-        if os.path.exists(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{self.files[0]}'))):
-            self.unLinkMesh()
+        self.unLinkMesh()
 
         for file in self.files:
             # Relative path raise errors
@@ -69,11 +68,12 @@ class RDB():
             os.symlink(src, dst)
 
     def unLinkMesh(self):
-        # Check if files is linked
-        if os.path.exists(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{self.files[0]}'))):
-            # Delete links in order
-            for file in self.files:
-                os.unlink(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{file}')))
+        # Unlinks files in order
+        for file in self.files:
+            # Check if files is linked
+            file = os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{file}'))
+            if os.path.exists(file):
+                os.remove(file)
 
     def setBC(self):
         if not self.__bcFlag :
@@ -174,8 +174,7 @@ class PPDB():
 
     # Public
     def linkMesh(self):
-        if os.path.exists(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{self.files[0]}'))):
-            self.unLinkMesh()
+        self.unLinkMesh()
 
         for file in self.files:
             # Relative path raise errors
@@ -184,11 +183,12 @@ class PPDB():
             os.symlink(src, dst)
 
     def unLinkMesh(self):
-        # Check if files is linked
-        if os.path.exists(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{self.files[0]}'))):
-            # Delete links in order
-            for file in self.files:
-                os.unlink(os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{file}')))
+        # Unlinks files in order
+        for file in self.files:
+            # Check if files is linked
+            file = os.path.abspath(os.path.join(self.__caseRoot, f'constant/polyMesh/{file}'))
+            if os.path.exists(file):
+                os.remove(file)
 
     def linkTimeHistory(self, case):
         # Check if case exists
@@ -242,7 +242,6 @@ class PPDB():
         if os.path.exists(postProcessDataPath):
             if override :
                 print(f'Case {self.geoName} @ {self.case} Mach overrided')
-                print(postProcessDataPath)
                 os.system(f'rm -rf {postProcessDataPath}')
                 
             else : 
@@ -279,32 +278,33 @@ class PPDB():
 
 if __name__ == '__main__':
 
-    # temp = RDB(geoName='k75_c10_d14', Mach=2.8, caseRoot='./12589', targetPath='data/rawData')
+    temp = RDB(geoName='k100_c10_d28', Mach=1.372, caseRoot='./test1', targetPath='data/rawData')
+    # temp = RDB(geoName='k100_c50_d14', Mach=2.271, caseRoot='./test2', targetPath='data/rawData')
 
-    # temp.linkMesh()
-    # temp.sim()
-    # temp.post()
-    # temp.unLinkMesh()
-
-    import time
-
-    start = last = time.time()
-    temp = PPDB(geoName='k50_c10_d14')
-    temp.copyInclude()
     temp.linkMesh()
-    
-    for case in temp.cases[1:]:
-        print(f'Case {case} Mach begin')
-        temp.linkTimeHistory(case)
-        temp.post()
-        temp.cleanUpTimeHistory()
-        print(f'Case {case} Mach end')
-        now = time.time()
-        print(f'Elapsed time {now - last} seconds')
-        last = now
+    temp.sim()
+    temp.post()
     temp.unLinkMesh()
-    print(f'All cases completed')
-    print(f'Elapsed time {time.time() - start} seconds')
+
+    # import time
+
+    # start = last = time.time()
+    # temp = PPDB(geoName='k50_c10_d14')
+    # temp.copyInclude()
+    # temp.linkMesh()
+    
+    # for case in temp.cases[1:]:
+    #     print(f'Case {case} Mach begin')
+    #     temp.linkTimeHistory(case)
+    #     temp.post()
+    #     temp.cleanUpTimeHistory()
+    #     print(f'Case {case} Mach end')
+    #     now = time.time()
+    #     print(f'Elapsed time {now - last} seconds')
+    #     last = now
+    # temp.unLinkMesh()
+    # print(f'All cases completed')
+    # print(f'Elapsed time {time.time() - start} seconds')
 
     # generator = DFMG(srcPath='hisaPost', targetPath='data/demoData/k50_c10_d14/2.441/312', mode='demo')
     # generator.constructAIPFieldArray()
