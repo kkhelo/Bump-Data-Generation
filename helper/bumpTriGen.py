@@ -145,17 +145,31 @@ def bumpTriGen(bumpMeshSize : float = 0.01, plateMeshSize : float = 0.05, domain
         gmsh.model.mesh.generate(2)
 
         name = f'k{int(k*100):d}_c{int(c*100):d}_d{d:d}.stl'
-         
-        if not os.path.exists('./stlBump') : os.mkdir('./stlBump')
-        gmsh.write(os.path.join('./stlBump', name))
+        
+        # # training geometry
+        # if not os.path.exists('./stlBump') : os.mkdir('./stlBump')
+        # gmsh.write(os.path.join('./stlBump', name))
+
+        # testing geometry
+        if not os.path.exists('./stlBumpTest') : os.mkdir('./stlBumpTest')
+        gmsh.write(os.path.join('./stlBumpTest', name))
+
         # gmsh.write('test.geo_unrolled')
         
         gmsh.finalize()
 
 if __name__ == '__main__':
-    for k in [0.5, 0.75, 1.0]:
-        for c in [0.1, 0.3, 0.5]:
-            for d in [28, 21, 14]:
+
+    # # training geometry
+    # for k in [0.5, 0.75, 1.0]:
+    #     for c in [0.1, 0.3, 0.5]:
+    #         for d in [28, 21, 14]:
+    #             bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=k, c=c, d=d, xGrid = 101, yGrid=201)
+
+    # testing geometry
+    for k in [0.8, 1.3]:  
+        for c in [0.2, 0.6]:
+            for d in [20, 30]:
                 bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=k, c=c, d=d, xGrid = 101, yGrid=201)
 
     # bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=0.5, c=0.5, d=28, xGrid = 41, yGrid=81)

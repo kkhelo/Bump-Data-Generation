@@ -5,6 +5,7 @@
 **/test.py
 **/fullFlow.py
 testDatasetBuild.py
+testHisa
 
 # OpenFOAM
 **/[1-9]*/
@@ -16,9 +17,7 @@ VTK/
 fluentToFoam.py
 
 # Data generation
-d14/
-d21/
-d28/
+d[0-9]*/
 ID*/
 
 # Gmsh

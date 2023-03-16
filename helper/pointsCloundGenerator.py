@@ -148,28 +148,23 @@ class bumpProbesWriter():
     
 
 if __name__ == '__main__' :
-    for k in [0.5, 0.75, 1.0]:
-        for c in [0.1, 0.3, 0.5]:
-            for d in [14, 21, 28]:
+    # # Training geometry
+    # for k in [0.5, 0.75, 1.0]:
+    #     for c in [0.1, 0.3, 0.5]:
+    #         for d in [14, 21, 28]:
+
+    # Testing geometry
+    for k in [0.8, 1.3]:  
+        for c in [0.2, 0.6]:
+            for d in [20, 30]:
                 bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
 
+                # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
                 G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
-                # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
                 G.writeSurface()
                 G.AIP(neighbor=2, neighborSpacing=0.02)
-                # if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
-                #     os.mkdir(f'preprocessing/{bumpName}/mesh')
+                if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
+                    os.mkdir(f'preprocessing/{bumpName}/mesh')
                 # G.flowDirectionalSlice(nSlices=5)
                 # G.cleanFlowDirectionalSlices()
                 # G.cleanAIPSlices()
-    
-    # G = bumpProbesWriter(0.5, 0.3, 21, rootDir='preprocessing', res=256)
-    # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', DEBUG=False)
-    # G.writeSurface()
-    # G.AIP(neighbor=2, neighborSpacing=0.02)
-    # G.flowDirectionalSlice(nSlices=5)
-    # G.cleanFlowDirectionalSlices()
-    # G.cleanAIPSlices()
-
-
-    pass

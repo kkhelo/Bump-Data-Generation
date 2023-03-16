@@ -33,9 +33,10 @@ class DFMG():
         self.__targetPath = targetPath
         self.__mode = mode.upper()
         if self.__mode not in self.MODE: 
-            raise ValueError(F'Invalid Mode : {mode},   Available Options are (TRAIN, TEST, DEMO)')
-        if not os.path.exists(self.__targetPath) : os.mkdir(self.__targetPath)
+            raise ValueError(F'Invalid Mode : {mode}, Available Options are (TRAIN, TEST, DEMO)')
+        if not os.path.exists(self.__targetPath) : os.makedirs(self.__targetPath)
         self.resolution = res
+        
 
     def constructSurfacePressureArray(self):
         """
@@ -95,8 +96,7 @@ class DFMG():
 
         """
 
-        self.__AIPPath = glob.glob(self.__AIPPath)
-        self.__AIPPath = sorted(self.__AIPPath)
+        self.__AIPPath = sorted(glob.glob(self.__AIPPath))
         neighbors = len(self.__AIPPath)
         AIPData = np.zeros((neighbors, len(fieldName), self.resolution, self.resolution))
         geoMask = np.zeros((neighbors, self.resolution, self.resolution))
@@ -120,7 +120,7 @@ class DFMG():
                         geoMask[indexNeighbor,i,j] = 1
 
             AIPTags.append(path.split('/')[-1].split('_')[0])
-            if self.__mode == 'DEMO' and  AIPTags[-1] == 'AIP':
+            if self.__mode == 'DEMO' and AIPTags[-1] == 'AIP':
                 # AIP flow field images
                 for i in range(len(fieldName)):
                     plt.figure(figsize=(8,4))
@@ -157,10 +157,10 @@ class DFMG():
 
         
 if __name__ == '__main__':
-    srcPath = 'tempOpenFoam'
-    targetPath = 'data/demoData/k50_c10_d14_M1600'
-    G = DFMG(srcPath=srcPath, targetPath=targetPath, mode='demo')
+    srcPath = 'ID25065'
+    targetPath = 'data/trainingData/k50_c10_d14/2.201/313'
+    G = DFMG(srcPath=srcPath, targetPath=targetPath)
     G.constructAIPFieldArray()
-    G.constructSurfacePressureArray()
+    # G.constructSurfacePressureArray()
 
     

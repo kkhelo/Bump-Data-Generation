@@ -137,14 +137,13 @@ class PPDB():
     files = ['boundary', 'cellZones', 'faces', 'faceZones', 'neighbour', 'owner', 'points', 'pointZones']
     flowProperties = ['alphat', 'k', 'nut', 'omega', 'p', 'p0', 'pseudoCoField', 'rho', 'T', 'U', 'uniform/pseudoCoNum', 'uniform/pseudotimeState', 'uniform/time']
 
-    def __init__(self, geoName: str, caseRoot: str = 'hisaPost', rawDataRoot : str = 'data/demoRawData', targetPath: str = 'data/demoData', failedPPCase : str = 'data/failedPPCase') -> None:
+    def __init__(self, geoName: str, caseRoot: str = 'hisaPost', rawDataRoot : str = 'data/demoRawData', targetPath: str = 'data/demoData') -> None:
         self.__postProcessDataRoot = os.path.join(targetPath, geoName)
         self.__rawDataRoot = os.path.join(rawDataRoot, geoName)
         self.__meshPath = f'./preprocessing/{geoName}/mesh/polyMesh/'
         self.__caseRoot = caseRoot
-        self.__failedPPCase = failedPPCase
         self.geoName = geoName
-        os.makedirs(self.__postProcessDataRoot, exist_ok=True) 
+        if not os.path.exists(self.__postProcessDataRoot) : os.makedirs(self.__postProcessDataRoot) 
         self.cases = os.listdir(self.__rawDataRoot)
 
     # Private
@@ -162,16 +161,7 @@ class PPDB():
                 return file
         
         raise FileExistsError(f'Unable to locate time history in {os.path.join(self.__rawDataRoot, case)}')
-
-    def __failedCaseHandler(self, step : str, postProcessDataPath):
-        os.removedirs(f'../{postProcessDataPath}')
-        dst = os.path.join(f'../{self.__failedPPCase}', self.geoName, self.case, self.timeHistory)
-        os.makedirs(dst)
-        os.system(f'mv log.{step} {dst}')
-        os.chdir('..')
-        raise RuntimeError(f'Error occurs at {step} step!')
     
-
     # Public
     def linkMesh(self):
         self.unLinkMesh()
@@ -214,7 +204,7 @@ class PPDB():
         self.case = case
     
     def cleanUpTimeHistory(self):
-        for timeHistory in os.listdir(os.path.join(self.__caseRoot)):
+        for timeHistory in os.listdir(self.__caseRoot):
             if timeHistory.isdigit() and int(timeHistory):
                 path = os.path.join(self.__caseRoot, timeHistory)
                 os.system(f'rm -r {path}')
@@ -234,78 +224,52 @@ class PPDB():
         src = os.path.join('preprocessing', self.geoName, 'system/include')
         os.system(f'cp -r {src} {dst}')
 
-    def post(self, override : bool = False, mode='demo', res=256):
+    def post(self, override : bool = False, mode='demo', res=256, dataCategories = ['AIPData', 'bumpSurfaceData']):
         postProcessDataPath = os.path.join(self.__postProcessDataRoot, self.case, self.timeHistory)
-        
-        # Check if post process data exists in database 
+        if not os.path.exists(postProcessDataPath) : os.makedirs(postProcessDataPath)
+        # Check if post processed data exists in database 
         # Override old data if flag is on
-        if os.path.exists(postProcessDataPath):
-            if override :
-                print(f'Case {self.geoName} @ {self.case} Mach overrided')
-                os.system(f'rm -rf {postProcessDataPath}')
-                
-            else : 
-                raise FileExistsError(f'Case {self.geoName} @ {self.case} Mach is already exist in database!')
+        buildList = dataCategories.copy()
+        for dataCategory in dataCategories:
+            filePath = os.path.join(postProcessDataPath, dataCategory+'.npz')
+            if os.path.exists(filePath):
+                if override :
+                    os.remove(filePath)
+                else:
+                    buildList.remove(dataCategory)
 
-        os.makedirs(postProcessDataPath)
-
-        os.chdir(self.__caseRoot)
-
-        try :
-            status = os.system('postProcess -latestTime -func boundaryCloud > log.boundaryCloud')
-        except:
-            status = -1
-            self.__failedCaseHandler('boundaryCloud', postProcessDataPath)
-        if status : return
-
-        os.remove('log.boundaryCloud')
-
-        try :
-            status = os.system('postProcess -latestTime -func internalCloud> log.internalCloud')
-        except:
-            status = -1
-            self.__failedCaseHandler('internalCloud', postProcessDataPath)
-        if status : return    
-    
-        os.remove('log.internalCloud')
-        os.chdir('..')
+        if buildList :
+            print(f'Case {self.geoName} @ {self.case} Mach build the following data :', end=' ')
+            for data in buildList : print(data, end=' ')
+            print()
+        else:
+            print(f'Case {self.geoName} @ {self.case} has complete information, skip.')
+            return
 
         generator = DFMG(srcPath=self.__caseRoot, targetPath=postProcessDataPath, mode=mode, res=res)
-        generator.constructAIPFieldArray()
-        generator.constructSurfacePressureArray()
-        
 
+        # if 'bumpSurfaceData' in buildList and not os.path.exists(os.path.join(postProcessDataPath, 'bumpSurfaceData.npz')):
+        if 'bumpSurfaceData' in buildList:
+            os.chdir(self.__caseRoot)
+            status = os.system('postProcess -latestTime -func boundaryCloud > log.boundaryCloud')
+            if status : return
+            os.chdir('..')
+            generator.constructSurfacePressureArray()  
+
+        # if not os.path.exists(os.path.join(postProcessDataPath, 'AIPData.npz')):
+        if 'AIPData' in buildList:
+            os.chdir(self.__caseRoot)
+            status = os.system('postProcess -latestTime -func internalCloud> log.internalCloud')
+            if status : return  
+            os.chdir('..')
+            generator.constructAIPFieldArray()
+    
 
 if __name__ == '__main__':
 
     temp = RDB(geoName='k100_c10_d28', Mach=1.372, caseRoot='./test1', targetPath='data/rawData')
-    # temp = RDB(geoName='k100_c50_d14', Mach=2.271, caseRoot='./test2', targetPath='data/rawData')
 
     temp.linkMesh()
     temp.sim()
     temp.post()
     temp.unLinkMesh()
-
-    # import time
-
-    # start = last = time.time()
-    # temp = PPDB(geoName='k50_c10_d14')
-    # temp.copyInclude()
-    # temp.linkMesh()
-    
-    # for case in temp.cases[1:]:
-    #     print(f'Case {case} Mach begin')
-    #     temp.linkTimeHistory(case)
-    #     temp.post()
-    #     temp.cleanUpTimeHistory()
-    #     print(f'Case {case} Mach end')
-    #     now = time.time()
-    #     print(f'Elapsed time {now - last} seconds')
-    #     last = now
-    # temp.unLinkMesh()
-    # print(f'All cases completed')
-    # print(f'Elapsed time {time.time() - start} seconds')
-
-    # generator = DFMG(srcPath='hisaPost', targetPath='data/demoData/k50_c10_d14/2.441/312', mode='demo')
-    # generator.constructAIPFieldArray()
-    # generator.constructSurfacePressureArray()
