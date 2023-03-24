@@ -48,7 +48,7 @@ def task(geoName, override = False, mode = 'train', targetPath='data/demo', rawD
     temp.unLinkMesh()
     print(f'All cases in {geoName} completed. Total time elapsed {time.time() - start} seconds')
     os.chdir(cwd)
-    # os.system(f'rm -r ID{id}')
+    os.system(f'rm -r ID{id}')
 
 def main():
     targetPath, rawDataRoot = sys.argv[1], sys.argv[2]

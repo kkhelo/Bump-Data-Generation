@@ -154,6 +154,7 @@ class PPDB():
         """ 
 
         files = os.listdir(os.path.join(self.__rawDataRoot, case))
+        print(files)
         if len(files) > 2:
             raise FileExistsError(f'More than 2 files or folder found in {os.path.join(self.__rawDataRoot, case)}')
         for file in files:

@@ -166,9 +166,15 @@ if __name__ == '__main__':
     #         for d in [28, 21, 14]:
     #             bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=k, c=c, d=d, xGrid = 101, yGrid=201)
 
-    # testing geometry
-    for k in [0.8, 1.3]:  
-        for c in [0.2, 0.6]:
+    # # testing geometry
+    # for k in [0.8, 1.3]:  
+    #     for c in [0.2, 0.6]:
+    #         for d in [20, 30]:
+    #             bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=k, c=c, d=d, xGrid = 101, yGrid=201)
+
+    # testing geometry2
+    for k in [0.6, 0.8]:  
+        for c in [0.2, 0.4]:
             for d in [20, 30]:
                 bumpTriGen(bumpMeshSize=0.01, plateMeshSize=0.2,k=k, c=c, d=d, xGrid = 101, yGrid=201)
 
