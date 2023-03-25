@@ -154,8 +154,8 @@ if __name__ == '__main__' :
     #         for d in [14, 21, 28]:
 
     # Testing geometry
-    for k in [0.8, 1.3]:  
-        for c in [0.2, 0.6]:
+    for k in [0.6, 0.8]:  
+        for c in [0.2, 0.4]:
             for d in [20, 30]:
                 bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
 
