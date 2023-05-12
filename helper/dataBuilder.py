@@ -12,9 +12,10 @@ Date : 2023-01-11
 
 """
 
-import os
+import os, random
 from bcMailMan import bcMailMan
 from databaseFieldMatrixGenerator import DFMG
+from pointsCloundGenerator import xSlice
 
 class RDB():
     """ 
@@ -225,7 +226,7 @@ class PPDB():
         src = os.path.join('preprocessing', self.geoName, 'system/include')
         os.system(f'cp -r {src} {dst}')
 
-    def post(self, override : bool = False, mode='demo', res=256, dataCategories = ['AIPData', 'bumpSurfaceData']):
+    def post(self, override : bool = False, mode='demo', res=256, dataCategories = ['AIPData', 'bumpSurfaceData', 'sliceData'], xCoor = None):
         postProcessDataPath = os.path.join(self.__postProcessDataRoot, self.case, self.timeHistory)
         if not os.path.exists(postProcessDataPath) : os.makedirs(postProcessDataPath)
         # Check if post processed data exists in database 
@@ -260,17 +261,40 @@ class PPDB():
         # if not os.path.exists(os.path.join(postProcessDataPath, 'AIPData.npz')):
         if 'AIPData' in buildList:
             os.chdir(self.__caseRoot)
-            status = os.system('postProcess -latestTime -func internalCloud> log.internalCloud')
+            status = os.system('postProcess -latestTime -func internalCloudAIP > log.internalCloudAIP')
             if status : return  
             os.chdir('..')
             generator.constructAIPFieldArray()
+
+        if 'sliceData' in buildList:
+            
+            if not xCoor : xCoor = sorted([round(random.uniform(0.05, 0.45), 3) for _ in range(10)])
+            xSlice(xCoor, yBound=[-0.5,0.5], zBound=[0,0.5], 
+                   fileDir=os.path.join(self.__caseRoot, 'system/include'), pointName='slice')
+            os.chdir(self.__caseRoot)
+            status = os.system('postProcess -latestTime -func internalCloudSlice > log.internalCloudSlice')
+            if status : return  
+            os.chdir('..')
+            generator.constructSliceFieldArray(xCoor)
     
 
 if __name__ == '__main__':
 
-    temp = RDB(geoName='k100_c10_d28', Mach=1.372, caseRoot='./test1', targetPath='data/rawData')
+    # temp = RDB(geoName='k100_c10_d28', Mach=1.372, caseRoot='./test1', targetPath='data/rawData')
 
+    # temp.linkMesh()
+    # temp.sim()
+    # temp.post()
+    # temp.unLinkMesh()
+
+    temp = PPDB(geoName='k100_c10_d28', caseRoot='testSlice', 
+                rawDataRoot='data/rawData', targetPath='data/sliceData')
+    
+    temp.copyInclude()
     temp.linkMesh()
-    temp.sim()
-    temp.post()
-    temp.unLinkMesh()
+    temp.linkTimeHistory(temp.cases[0])
+    temp.post(dataCategories=['sliceData'])
+
+    # temp.cleanUpTimeHistory()
+    # temp.unLinkMesh()
+    

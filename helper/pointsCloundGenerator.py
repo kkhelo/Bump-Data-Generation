@@ -29,8 +29,13 @@ def ySlice(yCoor : float = 0.0, xBound = [-0.25, 0.75], zBound = [0, 0.5], res :
                     of.write(f'({x} {yCoor} {z})\n')
             of.write(');\n')
 
-def xSlice(xCoor : float = 0.0, yBound = [-0.5, 0.5], zBound = [0, 0.5], res : float = 256, fileDir = '', pointName = None):
-        fileDir = os.path.join(fileDir, pointName) if pointName else os.path.join(fileDir, f'x={xCoor}')
+def xSlice(xCoor : any = [0.0], yBound = [-0.5, 0.5], zBound = [0, 0.5], res : float = 256, fileDir = '', pointName = None):
+        if type(xCoor) is float or type(xCoor) is int: 
+            xCoor = [xCoor]
+        elif type(xCoor) is not list:
+            raise ValueError('Invalid xCoor data type. Expected list, float or int')
+            
+        fileDir = os.path.join(fileDir, pointName) if pointName else os.path.join(fileDir, f'x={xCoor[0]}')
         dx, dz = (yBound[-1]-yBound[0])/res, (zBound[-1]-zBound[0])/res
         yList = np.linspace(yBound[0]+dx, yBound[-1]-dx, res)
         zList = np.linspace(zBound[0]+dz, zBound[-1]-dz, res)
@@ -38,11 +43,12 @@ def xSlice(xCoor : float = 0.0, yBound = [-0.5, 0.5], zBound = [0, 0.5], res : f
             if pointName :
                 of.write(pointName + '\n')
             else:
-                of.write(f'pointsX{int(xCoor*100)}\n')
+                of.write(f'pointsX{int(xCoor[0]*100)}\n')
             of.write('(\n')
-            for y in yList:
-                for z in zList:
-                    of.write(f'({xCoor} {y} {z})\n')
+            for x in xCoor:
+                for y in yList:
+                    for z in zList:
+                        of.write(f'({x} {y} {z})\n')
             of.write(');\n')
 
 class bumpProbesWriter():
@@ -145,26 +151,47 @@ class bumpProbesWriter():
 
         if self.__DEBUG :  print(f'Clean up AIP slice files in {self.__rootDir}')   
 
-    
 
 if __name__ == '__main__' :
-    # # Training geometry
+    
+    ###############################################################
+    # # # Training geometry
     # for k in [0.5, 0.75, 1.0]:
     #     for c in [0.1, 0.3, 0.5]:
     #         for d in [14, 21, 28]:
+    #             bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
 
-    # Testing geometry
-    for k in [0.6, 0.8]:  
-        for c in [0.2, 0.4]:
-            for d in [20, 30]:
-                bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
+    #             # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
+    #             G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
+    #             G.writeSurface()
+    #             G.AIP(neighbor=0, neighborSpacing=0.02)
+    #             if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
+    #                 os.mkdir(f'preprocessing/{bumpName}/mesh')
+    #             # G.flowDirectionalSlice(nSlices=5)
+    #             # G.cleanFlowDirectionalSlices()
+    #             # G.cleanAIPSlices()
 
-                # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
-                G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
-                G.writeSurface()
-                G.AIP(neighbor=2, neighborSpacing=0.02)
-                if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
-                    os.mkdir(f'preprocessing/{bumpName}/mesh')
-                # G.flowDirectionalSlice(nSlices=5)
-                # G.cleanFlowDirectionalSlices()
-                # G.cleanAIPSlices()
+    # # Testing geometry
+    # for k in [0.6, 0.8]:  
+    #     for c in [0.2, 0.4]:
+    #         for d in [20, 30]:
+    #             bumpName = f'k{int(k*100):d}_c{int(c*100):d}_d{d}'
+
+    #             # G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
+    #             G = bumpProbesWriter(k, c, d, rootDir='preprocessing', res=256)
+    #             G.writeSurface()
+    #             G.AIP(neighbor=0, neighborSpacing=0.02)
+    #             if not os.path.exists(f'preprocessing/{bumpName}/mesh'):
+    #                 os.mkdir(f'preprocessing/{bumpName}/mesh')
+    #             # G.flowDirectionalSlice(nSlices=5)
+    #             # G.cleanFlowDirectionalSlices()
+    #             # G.cleanAIPSlices()
+    
+    ################################################################
+    import random
+
+    random_list = sorted([round(random.uniform(0.05, 0.45), 3) for _ in range(10)])
+    
+    print(random_list)
+
+    xSlice(random_list, pointName='slice', fileDir='')

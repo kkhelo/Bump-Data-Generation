@@ -7,7 +7,7 @@ flags :
     * -o : override, default is False.
     * --rawpath : path to raw daraset, default is data/rawData.
     * --targetpath : path to post processed dataset, where the file will save to. Default is data/demo.
-    * --demo : activated demo mode. Demo mode creates figure from data but train mode doesn't. Default is train.
+    * --demo : activate demo mode. Demo mode creates figure from data but train mode doesn't. Default is train.
     * --geometry : specified geometry, this build only do 1 geometry not every in raw dataset.
 author : Bo-Yuan You
 Date : 2023-01-20
@@ -37,7 +37,7 @@ def task(geoName, override = False, mode = 'train', targetPath='data/demo', rawD
     for case in temp.cases:
         temp.linkTimeHistory(case)
         try :
-            temp.post(override=override, mode=mode, res=256)
+            temp.post(override=override, mode=mode, res=256, dataCategories=['AIPData', 'bumpSurfaceData', 'sliceData'], xCoor=[0.1,0.15,0.2,0.25,0.3,0.35,0.4])
             print(f'Case {geoName} @ {case} Mach end. Elapsed time {time.time() - last} seconds')
         except :
             print(f'Case {geoName} @ {case} Mach failed')
