@@ -29,4 +29,4 @@ def bcMailMan(caseRootDir : str, Mach : float, T : float = 300.0, I : float = 0.
 
 
 if __name__ == '__main__' :
-    bcMailMan(caseRootDir='hisa', Mach=1.0)
+    bcMailMan(caseRootDir='hisaTemplate', Mach=2.0)

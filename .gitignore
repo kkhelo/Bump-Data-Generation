@@ -6,6 +6,10 @@
 **/fullFlow.py
 testDatasetBuild.py
 testHisa
+meshDependancy
+hisaS*
+hisaV*
+meshDependancy.ipynb
 
 # OpenFOAM
 **/[1-9]*/

@@ -1,7 +1,7 @@
 """
 
 name : rawDatasetBuild.py
-usage : build raw dataset with specified cone angle and number.
+usage : build cfd data with specified cone angle and number.
 flags : 
     * -d : cone angle, must declare.
     * --samples : number of data to build, default is 10.

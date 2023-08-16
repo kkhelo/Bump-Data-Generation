@@ -20,9 +20,7 @@ class DFMG():
     Generator class construct 2 basic array with 1 additional array
         *** Basic
             * AIP (neighbor included)
-            * surface (pressure and height)
-        *** Additional 
-            * xSlice and ySlice
+            * surface (pressure and heightmap)
     """
 
     MODE = ['TRAIN', 'TEST', 'DEMO']
@@ -52,7 +50,7 @@ class DFMG():
             raise IOError(f'There are {len(surfacePath)} surface_p.xy in srcPath, should be 1.')
         
         surfacePath = surfacePath[0]
-        pressureData = np.loadtxt(self.surfacePath)
+        pressureData = np.loadtxt(surfacePath)
 
         # Check number of data points 
         nPts = pressureData.shape[0]
@@ -86,11 +84,11 @@ class DFMG():
        
     def constructAIPFieldArray(self, fieldName : list = ['p', 'p0', 'rho', 'Ux', 'Uy', 'Uz']):
         """
-        Read AIP_p_po_U.xy and its neighbors in srcPath, and construct numpy array from it. 
+        Read AIP_*.xy and its neighbors in srcPath, and construct numpy array from it. 
         File will be save in $srcPath/AIPData.npz will following keys
 
-        * AIPData : 4-D array with size (numberOfNeighbors, numberOfFields, resolution, resolution)
-        * geoMask : 3-D array with size (numberOfNeighbors, resolution, resolution)
+        * AIPData : 4-D array with size (numberOfNeighbors (1), numberOfFields (6), resolution, resolution)
+        * geoMask : 3-D array with size (numberOfNeighbors (1), resolution, resolution)
         * AIPTags : 1-D array specified AIP tags, ex : ['AIP1', 'AIP', 'AIPM1']
 
         """
